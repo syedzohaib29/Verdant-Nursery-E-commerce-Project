@@ -11,3 +11,67 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+// Money is ALWAYS integer cents (SQLite has no Decimal).
+// Statuses and roles are String and validated with the Zod constants in
+// /src/lib/constants.ts, because SQLite has no reliable enum support.
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String
+  latinName  String
+  note       String
+  priceCents Int
+  status     String   @default("DRAFT")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([status])
+}
+
+model Customer {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  role         String   @default("CUSTOMER")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([role])
+}
+
+model Order {
+  id         String   @id @default(cuid())
+  status     String   @default("PENDING")
+  totalCents Int
+  customerId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items    OrderItem[]
+
+  @@index([status])
+  @@index([customerId])
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  // Price is captured per line at order time, in integer cents, so historical
+  // orders do not shift when a product price changes.
+  unitCents Int
+  quantity  Int    @default(1)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
