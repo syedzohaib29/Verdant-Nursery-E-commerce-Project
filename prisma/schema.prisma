@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -12,66 +10,282 @@ datasource db {
   provider = "sqlite"
 }
 
-// Money is ALWAYS integer cents (SQLite has no Decimal).
-// Statuses and roles are String and validated with the Zod constants in
-// /src/lib/constants.ts, because SQLite has no reliable enum support.
+/**
+ * Verdant catalogue.
+ * Two conventions hold across every model:
+ * 1. Money is ALWAYS an integer number of cents. SQLite has no Decimal and no
+ * reliable enum support, so there are no `Decimal` and no `enum` types here.
+ * 2. Anything with a small fixed set of values (role, statuses, light, water,
+ * difficulty, payment method) is stored as `String` and validated with the
+ * Zod constants in /src/lib/constants.ts. That way the allowed values live in
+ * one auditable place and an unexpected value fails loudly at the boundary
+ * instead of silently flowing through the app.
+ * Order lines snapshot `name`, `priceCents` and `image` rather than joining back
+ * to Product, because an order must keep showing what the customer actually
+ * bought after the product is renamed, repriced or deleted. The same reasoning
+ * puts the shipping address on Order instead of only on Address.
+ */
 
-model Product {
-  id         String   @id @default(cuid())
-  name       String
-  latinName  String
-  note       String
-  priceCents Int
-  status     String   @default("DRAFT")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  orderItems OrderItem[]
-
-  @@index([status])
-}
-
-model Customer {
+model User {
   id           String   @id @default(cuid())
+  name         String
   email        String   @unique
-  name         String?
   passwordHash String
   role         String   @default("CUSTOMER")
+  phone        String?
+  // Staff can be kept on the books but locked out, without deleting their order
+  // history or their reviews.
+  disabled     Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  orders Order[]
+  addresses     Address[]
+  orders        Order[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
 
   @@index([role])
+  @@index([createdAt])
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  userId     String
+  fullName   String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  postalCode String
+  country    String  @default("US")
+  isDefault  Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Category {
+  id          String @id @default(cuid())
+  name        String
+  slug        String @unique
+  description String
+  image       String
+  // Lower numbers render first. Ties are broken by name so the order is stable.
+  sortOrder   Int    @default(0)
+
+  products Product[]
+
+  @@index([sortOrder])
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  description    String
+  priceCents     Int
+  // Set only while a product is on promotion. The effective price is
+  // salePriceCents ?? priceCents, and that decision is always made on the server.
+  salePriceCents Int?
+  stock          Int      @default(0)
+  sku            String   @unique
+  categoryId     String
+  // Featured products appear on the home page and at the top of the shop.
+  featured       Boolean  @default(false)
+  light          String
+  water          String
+  petSafe        Boolean  @default(false)
+  difficulty     String
+  // Mature height, used for the size filter and the care card. Null where the
+  // plant is sold by size class instead (planters, soil, fertiliser).
+  heightCm       Int?
+  careNotes      String
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category      Category       @relation(fields: [categoryId], references: [id])
+  images        ProductImage[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+  orderItems    OrderItem[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([featured])
+  @@index([createdAt])
+}
+
+model ProductImage {
+  id        String @id @default(cuid())
+  productId String
+  url       String
+  alt       String
+  // 0 is the image used on cards and in the cart line; higher numbers are the
+  // gallery. Ordering by position makes "the main image" unambiguous.
+  position  Int    @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, position])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  // 1-5, validated with Zod. Stored as an Int so it can be averaged in SQL.
+  rating    Int
+  title     String
+  body      String
+  // Only approved reviews are shown. Unapproved means pending moderation.
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productId, approved])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
 }
 
 model Order {
-  id         String   @id @default(cuid())
-  status     String   @default("PENDING")
-  totalCents Int
-  customerId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String  @id @default(cuid())
+  // Human-facing reference, VRD-10001 style. Unique and printed on the label.
+  orderNumber    String  @unique
+  // Nullable: guest checkout is allowed, and those orders are found by email.
+  userId         String?
+  email          String
+  status         String  @default("PENDING")
+  paymentMethod  String
+  paymentStatus  String  @default("PENDING")
+  subtotalCents  Int
+  discountCents  Int     @default(0)
+  shippingCents  Int     @default(0)
+  totalCents     Int
+  trackingNumber String?
 
-  customer Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  items    OrderItem[]
+  // Shipping address snapshot, copied at checkout so the order still has a
+  // deliverable address if the customer later edits or deletes theirs.
+  shipFullName   String
+  shipPhone      String
+  shipLine1      String
+  shipLine2      String?
+  shipCity       String
+  shipState      String
+  shipPostalCode String
+  shipCountry    String  @default("US")
+
+  createdAt DateTime @default(now())
+
+  user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items OrderItem[]
 
   @@index([status])
-  @@index([customerId])
+  @@index([userId])
+  @@index([email])
+  @@index([createdAt])
 }
 
 model OrderItem {
-  id        String @id @default(cuid())
-  orderId   String
-  productId String
-  // Price is captured per line at order time, in integer cents, so historical
-  // orders do not shift when a product price changes.
-  unitCents Int
-  quantity  Int    @default(1)
+  id         String  @id @default(cuid())
+  orderId    String
+  // Null only if the product is later deleted. The name, price and image below
+  // are snapshots, so the order line still reads correctly with no product row.
+  productId  String?
+  name       String
+  priceCents Int
+  quantity   Int     @default(1)
+  image      String?
 
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
   @@index([productId])
+}
+
+model JournalPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  // Markdown source. Rendered on the server; no HTML is stored, so there is no
+  // stored XSS surface.
+  content     String
+  coverImage  String
+  author      String
+  readMinutes Int
+  publishedAt DateTime
+  published   Boolean  @default(false)
+
+  @@index([published, publishedAt])
+  @@index([slug])
+}
+
+model Setting {
+  // Single-row table: the id is pinned to 1 in code (see /src/lib/data/settings.ts).
+  id                         Int     @id @default(1)
+  storeName                  String
+  shippingFeeCents           Int     @default(795)
+  freeShippingThresholdCents Int     @default(7500)
+  promoEnabled               Boolean @default(true)
+  contactEmail               String
+  contactPhone               String
+  address                    String
+}
+
+// Kept separate from NewsletterSubscriber: this is for people who want to hear
+// from us once a month, which is a different promise from a transactional
+// receipt and a different consent story.
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  topic     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([read])
+  @@index([createdAt])
+}
+
+model PromoCode {
+  id               String    @id @default(cuid())
+  code             String    @unique
+  discountPercent  Int
+  // Null minimum means the code applies to any subtotal.
+  minSubtotalCents Int?
+  active           Boolean   @default(true)
+  startsAt         DateTime  @default(now())
+  expiresAt        DateTime?
+
+  @@index([active])
 }

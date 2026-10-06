@@ -8,51 +8,72 @@
   Verdant design tokens.
   Palette is green/white/black only. Source hex values are named in comments so
   the system stays auditable against the spec in AGENTS.md.
+
+  Contrast notes (WCAG AA):
+    forest on white / warm-white / mint ....... 9.1 : 8.7 : 8.2
+    ink/60 on white / warm-white / mint ........ 5.1 : 5.0 : 4.8
+    mint on forest ............................. 7.9
+    white on forest ............................ 9.1
+    leaf is 3.5:1 on white and 3.0:1 on mint, so it is a surface and accent
+    colour only — never body text, never small text.
 */
 :root {
   /* ink    #0B0F0C */
   --ink: oklch(0.1627 0.009 152.9);
-  /* forest  #14532D — use for text on light backgrounds (9.11:1 on white) */
+  /* forest  #14532D — the only text colour used on light backgrounds */
   --forest: oklch(0.3925 0.0896 152.54);
-  /* leaf    #3E9B4F — surfaces and accents only, never body text (3.5:1) */
+  /* leaf    #3E9B4F — surfaces, accents and focus rings only (3.5:1) */
   --leaf: oklch(0.6152 0.1422 147.19);
   /* mint    #E6F2E8 */
   --mint: oklch(0.9494 0.0184 150.55);
   /* warm-white #F8F8F4 */
   --warm-white: oklch(0.978 0.0053 106.5);
 
-  /* Semantic surface + text roles built from the palette above. */
-  --background: var(--warm-white);
+  /* Surface levels. The four steps every section picks between, so neighbouring
+     sections can differ in density without the palette growing. */
+  --surface-page: var(--warm-white);
+  --surface-card: oklch(1 0 0);
+  --surface-sunken: var(--mint);
+  --surface-inverse: var(--forest);
+  --surface-inverse-deep: var(--ink);
+
+  /* Muted text = ink at 60%. AA on white (5.1:1), warm-white (5.0:1) and
+     mint (4.8:1). */
+  --text-muted: oklch(0.1627 0.009 152.9 / 0.6);
+
+  /* shadcn semantic roles, mapped onto the palette. */
+  --background: var(--surface-page);
   --foreground: var(--ink);
-  --card: oklch(1 0 0);
+  --card: var(--surface-card);
   --card-foreground: var(--ink);
-  --popover: oklch(1 0 0);
+  --popover: var(--surface-card);
   --popover-foreground: var(--ink);
   --primary: var(--forest);
   --primary-foreground: oklch(1 0 0);
   --secondary: var(--mint);
   --secondary-foreground: var(--forest);
   --muted: var(--mint);
-  --muted-foreground: oklch(0.4507 0.0256 157.78);
+  --muted-foreground: var(--text-muted);
   --accent: var(--mint);
   --accent-foreground: var(--forest);
-  --destructive: oklch(0.4888 0.1693 27.4);
-  --border: oklch(0.1627 0.009 152.9 / 10%);
-  --input: oklch(0.1627 0.009 152.9 / 14%);
+  --destructive: oklch(0.4513 0.1614 27.4);
+  --border: oklch(0.1627 0.009 152.9 / 0.1);
+  --input: oklch(0.1627 0.009 152.9 / 0.14);
   --ring: var(--leaf);
   --chart-1: var(--forest);
   --chart-2: var(--leaf);
   --chart-3: oklch(0.5036 0.1088 149.35);
-  --chart-4: oklch(0.3925 0.0896 152.54);
+  --chart-4: var(--forest);
   --chart-5: oklch(0.3268 0.0704 154.6);
-  --radius: 0.5rem;
+  /* 12 / 20 / 28px. Three steps, no in-between. */
+  --radius: 12px;
   --sidebar: var(--mint);
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--forest);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: var(--warm-white);
   --sidebar-accent-foreground: var(--forest);
-  --sidebar-border: oklch(0.1627 0.009 152.9 / 10%);
+  --sidebar-border: oklch(0.1627 0.009 152.9 / 0.1);
   --sidebar-ring: var(--leaf);
 }
 
@@ -96,17 +117,73 @@
   --color-mint: var(--mint);
   --color-warm-white: var(--warm-white);
 
+  /* Surface levels, so a section can change density with one class. */
+  --color-surface-page: var(--surface-page);
+  --color-surface-card: var(--surface-card);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-surface-inverse-deep: var(--surface-inverse-deep);
+  --color-text-muted: var(--text-muted);
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-bricolage), var(--font-inter), ui-sans-serif,
     system-ui, sans-serif;
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  /*
+    Fluid type. Every step is a clamp() that hits its minimum at 360px and its
+    maximum at 1024-1440px, so nothing has to be overridden per breakpoint.
+    Tracking, leading and weight travel with the size token, which means a
+    heading keeps its voice even when the class lands on a paragraph — and no
+    request for weight 400 can quietly fall out of the 500-800 range Bricolage
+    Grotesque is loaded with.
+  */
+  --text-display: clamp(3rem, 1.24rem + 7.8vw, 7.5rem);
+  --text-display--line-height: 0.95;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 700;
+
+  --text-h1: clamp(2.25rem, 1.3rem + 4.2vw, 4rem);
+  --text-h1--line-height: 1;
+  --text-h1--letter-spacing: -0.03em;
+  --text-h1--font-weight: 700;
+
+  --text-h2: clamp(1.75rem, 1.07rem + 3vw, 3rem);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.025em;
+  --text-h2--font-weight: 600;
+
+  --text-h3: clamp(1.375rem, 1.11rem + 1.19vw, 2rem);
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.02em;
+  --text-h3--font-weight: 600;
+
+  --text-body: clamp(1rem, 0.958rem + 0.185vw, 1.125rem);
+  --text-body--line-height: 1.65;
+  --text-body--font-weight: 400;
+
+  --text-small: clamp(0.8125rem, 0.779rem + 0.15vw, 0.875rem);
+  --text-small--line-height: 1.5;
+  --text-small--font-weight: 400;
+
+  /* The one eyebrow style. */
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.12em;
+  --text-eyebrow--font-weight: 500;
+
+  --radius-sm: 12px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-3xl: 28px;
+  --radius-4xl: 28px;
+
+  /* Soft, low, and tinted with ink rather than neutral grey. */
+  --shadow-soft: 0 1px 2px oklch(0.1627 0.009 152.9 / 0.04),
+    0 8px 24px -14px oklch(0.1627 0.009 152.9 / 0.14);
+  --shadow-lift: 0 2px 4px oklch(0.1627 0.009 152.9 / 0.05),
+    0 18px 44px -18px oklch(0.1627 0.009 152.9 / 0.2);
 
   /* Orchestrated entrance: 420ms on the spec easing curve. */
   --ease-verdant: cubic-bezier(0.22, 1, 0.36, 1);
@@ -120,23 +197,49 @@
   html {
     @apply font-sans;
     -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Anchors clear the sticky navbar instead of landing under it. */
+    scroll-padding-top: 6rem;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-body;
     text-rendering: optimizeLegibility;
   }
 
   h1,
   h2,
-  h3,
-  h4 {
+  h3 {
     @apply font-heading;
     text-wrap: balance;
   }
 
+  /* h4 has no step on the scale, so it inherits the same voice as h3. */
+  h4 {
+    @apply font-heading font-semibold;
+    text-wrap: balance;
+  }
+
+  h1 {
+    @apply text-h1;
+  }
+
+  h2 {
+    @apply text-h2;
+  }
+
+  h3 {
+    @apply text-h3;
+  }
+
   p {
     text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--mint);
+    color: var(--forest);
   }
 
   /* Prices align in columns. */
@@ -146,6 +249,97 @@
 
   :focus-visible {
     @apply outline-ring outline-2 outline-offset-2;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-sans text-eyebrow font-medium tracking-[0.12em] text-forest uppercase;
+  }
+
+  /* On the forest and ink surfaces the eyebrow flips to mint, which clears AA
+     comfortably and keeps the eyebrow consistent across surfaces. */
+  .eyebrow-inverse {
+    @apply font-sans text-eyebrow font-medium tracking-[0.12em] text-mint uppercase;
+  }
+
+  /*
+    Hover-only affordances, such as a product card's quick-add.
+
+    Written as a media query rather than a Tailwind variant because the rule that
+    matters is "only on devices that actually have a pointer". A phone has no hover
+    state, so anything gated on :hover is simply invisible there — which is how
+    quick-add controls end up unreachable with a thumb. On a touch device the
+    element is always shown; on a pointer device it fades in on hover.
+
+    Focus is deliberately outside the media query: a keyboard user tabbing onto a
+    control that only appears on hover would otherwise tab onto something invisible.
+  */
+  .reveal-on-hover {
+    transition:
+      opacity 320ms var(--ease-verdant),
+      transform 320ms var(--ease-verdant);
+  }
+
+  @media (hover: hover) {
+    .reveal-on-hover {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+
+    .group:hover .reveal-on-hover,
+    .group:focus-within .reveal-on-hover,
+    .reveal-on-hover:focus-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /*
+    The product gallery's zoom layer.
+
+    Scaling the <img> itself would make it blurry at 2x and would move it under the
+    cursor, so the zoom is a separate layer carrying the same file as a background
+    image at 210%, with background-position tracking the pointer. No filter, no
+    transform, nothing for the layout to react to.
+  */
+  .zoom-layer {
+    background-repeat: no-repeat;
+    background-size: 210% 210%;
+  }
+
+  /*
+    The space a fixed bottom bar occupies, published so the toaster can clear it.
+
+    The sticky add-to-cart bar writes its height here while it is on screen and the
+    toaster reads it, so a confirmation never lands underneath a purchase button.
+  */
+  :root {
+    --verdant-bottom-offset: 1.5rem;
+  }
+}
+
+/* Page gutter and measure for every section on the site. */
+@utility container-x {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1.25rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+
+  @media (width >= 64rem) {
+    padding-inline: 3rem;
+  }
+}
+
+/* Smooth scrolling is a preference, not a default, so it is opt-in via
+   `no-preference` rather than overridden with `!important`. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 

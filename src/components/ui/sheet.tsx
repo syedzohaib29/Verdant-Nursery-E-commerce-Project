@@ -7,8 +7,36 @@ import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
-function Sheet({ ...props }: SheetPrimitive.Root.Props) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />
+function Sheet({
+  open,
+  actionsRef: externalActionsRef,
+  ...props
+}: SheetPrimitive.Root.Props) {
+  // Sheet is the Dialog in drawer clothing, so it shares the same exit quirk:
+  // base-ui unmounts the popup on a `requestAnimationFrame` callback after the
+  // close transition, and browsers that starve rAF (headless, background tabs)
+  // can leave the panel frozen on top of the page. `unmount()` is the
+  // documented escape hatch and is a no-op when base-ui already unmounted, so a
+  // controlled close always ends with the panel gone from the DOM.
+  const internalActionsRef = React.useRef<SheetPrimitive.Root.Actions>(null)
+  const actionsRef = externalActionsRef ?? internalActionsRef
+
+  React.useEffect(() => {
+    if (open !== false) return
+    const timer = window.setTimeout(() => {
+      actionsRef.current?.unmount?.()
+    }, 260)
+    return () => window.clearTimeout(timer)
+  }, [open, actionsRef])
+
+  return (
+    <SheetPrimitive.Root
+      data-slot="sheet"
+      open={open}
+      actionsRef={actionsRef}
+      {...props}
+    />
+  )
 }
 
 function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
