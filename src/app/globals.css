@@ -497,6 +497,11 @@
     cursor, so the zoom is a separate layer carrying the same file as a background
     image at 210%, with background-position tracking the pointer. No filter, no
     transform, nothing for the layout to react to.
+
+    The scale is what gives the crop its travel: a background-position percentage is
+    measured against the layer's overflow, so at 210% the layer is 1.1x the stage in
+    each direction and can slide from -110% to 0%. That is what lets the pointer
+    reach every corner of the photograph — see `trackZoom`.
   */
   .zoom-layer {
     background-repeat: no-repeat;

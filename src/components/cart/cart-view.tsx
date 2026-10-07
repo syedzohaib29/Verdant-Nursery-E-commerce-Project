@@ -282,12 +282,26 @@ export function CartView({ customerName }: { customerName: string | null }) {
               </p>
             )}
 
+            {/* The reason to be on this page. Checkout is a separate route that
+                re-prices the basket from the server on arrival, so this is a plain
+                link rather than a submit: nothing about the order is decided here,
+                and the totals above are a preview of a number the checkout page
+                works out for itself. */}
+            <Button
+              size="lg"
+              nativeButton={false}
+              render={<Link href="/checkout" />}
+              className="mt-6 w-full"
+            >
+              Checkout
+            </Button>
+
             <Button
               size="lg"
               variant="secondary"
               nativeButton={false}
               render={<Link href="/shop" />}
-              className="mt-6 w-full"
+              className="mt-2.5 w-full"
             >
               Keep shopping
             </Button>

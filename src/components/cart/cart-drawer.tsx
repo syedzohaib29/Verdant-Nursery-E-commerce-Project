@@ -141,24 +141,39 @@ export function CartDrawer() {
           </p>
 
           <div className="mt-5 flex flex-col gap-2.5">
+            {/* Checkout leads, because most drawers are opened by pressing "add"
+                and the next thing wanted is usually to pay, not to read the
+                basket again. The other two keep their footing underneath it. */}
             <Button
               size="lg"
               nativeButton={false}
-              render={<Link href="/cart" onClick={closeDrawer} />}
+              render={<Link href="/checkout" onClick={closeDrawer} />}
               className="w-full"
             >
-              View basket
+              Checkout
             </Button>
 
-            <Button
-              size="lg"
-              variant="secondary"
-              nativeButton
-              onClick={closeDrawer}
-              className="w-full"
-            >
-              Keep shopping
-            </Button>
+            <div className="flex gap-2.5">
+              <Button
+                size="lg"
+                variant="secondary"
+                nativeButton={false}
+                render={<Link href="/cart" onClick={closeDrawer} />}
+                className="flex-1"
+              >
+                View basket
+              </Button>
+
+              <Button
+                size="lg"
+                variant="secondary"
+                nativeButton
+                onClick={closeDrawer}
+                className="flex-1"
+              >
+                Keep shopping
+              </Button>
+            </div>
           </div>
         </footer>
       </SheetContent>

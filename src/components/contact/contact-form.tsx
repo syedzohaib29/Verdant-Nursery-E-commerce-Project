@@ -111,7 +111,7 @@ export function ContactForm() {
     <form
       onSubmit={handleSubmit(onSubmit)}
       noValidate
-      className="rounded-2xl border border-ink/10 bg-white p-6 shadow-lift sm:p-8"
+      className="flex flex-col rounded-2xl border border-ink/10 bg-white p-6 shadow-lift sm:p-8"
     >
       {/* Honeypot: invisible to humans, irresistible to bots. */}
       <div hidden aria-hidden="true">
@@ -198,10 +198,27 @@ export function ContactForm() {
         </Field>
       </div>
 
-      <div className="mt-5">
-        <Field invalid={Boolean(errors.message)}>
+      {/* This field takes the slack in the card.
+
+          The grid row is as tall as the column beside it — an address card and a
+          map — so the form card is stretched to match it, and the space has to go
+          somewhere. It goes here: the box this form actually wants to be bigger is
+          the one people write into.
+
+          `flex-1` down the chain (wrapper, `Field`, `FieldControl`) is what makes it
+          grow to fill rather than sit at its minimum, and `min-h-40` is the floor
+          for when there is no slack to give — a narrow screen, where the card is
+          only as tall as its contents and the growth has nothing to distribute.
+
+          `rows={6}` is left in place but is not what sizes the box: the `Textarea`
+          primitive sets `field-sizing: content`, which sizes to the content and
+          floors at its own `min-h-16`, and the attribute is ignored while that is
+          in force. It stays as the fallback for a browser without `field-sizing`. */}
+      <div className="mt-5 flex flex-1 flex-col">
+        <Field invalid={Boolean(errors.message)} className="flex-1">
           <FieldLabel htmlFor="cf-message">The details</FieldLabel>
           <FieldControl
+            className="min-h-40 flex-1"
             render={
               <Textarea
                 id="cf-message"

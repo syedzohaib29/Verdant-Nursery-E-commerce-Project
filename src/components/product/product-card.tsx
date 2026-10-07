@@ -42,10 +42,19 @@ export function ProductCard({
         {/* The whole image is clickable, but that duplicate link is taken out of
             the tab order so a keyboard user meets one target per product rather
             than two, and out of the accessibility tree because the name link
-            below already names the product. */}
+            below already names the product.
+
+            `z-[5]` is load-bearing and the reason it is not `z-0`: an overlay link
+            and the images beneath it are both positioned in the same stacking
+            context, and `z-index: auto` — which every `next/image` sets — paints in
+            tree order *after* `z-index: 0`. So a `z-0` link sits under the
+            photograph, `elementFromPoint` returns the `<img>`, and the click goes
+            nowhere: the photo looked like a link and was not one. The number only
+            has to clear the images (0) and stay under the badges, heart and
+            quick-add, which are all `z-10`. */}
         <Link
           href={`/shop/${product.slug}`}
-          className="absolute inset-0 z-0"
+          className="absolute inset-0 z-[5]"
           tabIndex={-1}
           aria-hidden="true"
         />
