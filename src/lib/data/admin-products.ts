@@ -271,9 +271,6 @@ export async function productHasOrders(productId: string): Promise<boolean> {
 }
 
 /** How many order lines point at this product, for the delete explanation. */
-export async function productOrderCount(productId: string): Promise<number> {
-  return prisma.orderItem.count({ where: { productId } });
-}
 
 /** The images of one product, in display order. */
 export async function getProductImages(

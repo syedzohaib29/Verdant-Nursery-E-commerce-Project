@@ -1,14 +1,12 @@
 import "server-only";
 
-import type { Prisma } from "@/generated/prisma/client";
-
 import {
   LOW_STOCK_THRESHOLD,
   ORDER_STATUSES,
   orderStatusSchema,
   type OrderStatus,
 } from "@/lib/constants";
-import { summarySelect, toSummary, type OrderSummary } from "@/lib/data/orders";
+import type { OrderSummary } from "@/lib/data/orders";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 
@@ -358,49 +356,6 @@ export type OrdersPage = {
   total: number;
   pageCount: number;
 };
-
-/**
- * One page of the order list, sorted by a key the URL can name.
- *
- * Sort keys mirror column keys in the table, so what a header click writes into
- * the query string and what Prisma orders by are the same word.
- */
-export async function getOrdersPage(options: {
-  page: number;
-  status?: OrderStatus;
-  sort: OrderSortKey;
-  dir: SortDir;
-}): Promise<OrdersPage> {
-  const where = options.status ? { status: options.status } : {};
-
-  const orderBy: Record<OrderSortKey, Prisma.OrderOrderByWithRelationInput> = {
-    date: { createdAt: options.dir },
-    order: { orderNumber: options.dir },
-    total: { totalCents: options.dir },
-    status: { status: options.dir },
-    customer: { email: options.dir },
-  };
-
-  const [rows, total] = await Promise.all([
-    prisma.order.findMany({
-      where,
-      select: summarySelect,
-      orderBy: orderBy[options.sort],
-      skip: (options.page - 1) * ADMIN_ORDERS_PER_PAGE,
-      take: ADMIN_ORDERS_PER_PAGE,
-    }),
-    prisma.order.count({ where }),
-  ]);
-
-  return {
-    rows: rows.flatMap((row) => {
-      const summary = toSummary(row);
-      return summary ? [summary] : [];
-    }),
-    total,
-    pageCount: Math.max(1, Math.ceil(total / ADMIN_ORDERS_PER_PAGE)),
-  };
-}
 
 /* ------------------------------------------------------------------ *
  * Top-bar alerts

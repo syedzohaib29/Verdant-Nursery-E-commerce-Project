@@ -37,7 +37,7 @@ export function StarRow({
         <StarIcon
           key={position}
           aria-hidden="true"
-          strokeWidth={1.5}
+          strokeWidth={1.75}
           className={cn(
             "size-4",
             position <= filled ? "fill-forest text-forest" : "text-ink/20",

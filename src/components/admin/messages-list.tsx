@@ -153,7 +153,7 @@ export function MessagesList({ messages }: { messages: AdminContactMessage[] }) 
             <InboxIcon
               aria-hidden="true"
               className="size-8 text-ink/25"
-              strokeWidth={1.5}
+              strokeWidth={1.75}
             />
             <p className="mt-3 text-sm font-medium text-ink">
               The front door is quiet

@@ -95,9 +95,9 @@ export function OrderTimeline({ order }: { order: OrderDetail }) {
                 )}
               >
                 {isDone ? (
-                  <CheckIcon className="size-4" strokeWidth={2.5} />
+                  <CheckIcon className="size-4" strokeWidth={1.75} />
                 ) : isCancelledNode ? (
-                  <XIcon className="size-4" strokeWidth={2.5} />
+                  <XIcon className="size-4" strokeWidth={1.75} />
                 ) : (
                   index + 1
                 )}

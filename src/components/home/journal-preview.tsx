@@ -44,11 +44,11 @@ export function JournalPreview({ posts }: { posts: JournalCard[] }) {
                   aria-hidden="true"
                   fill
                   sizes="(min-width: 1024px) 54vw, 92vw"
-                  className="object-cover transition-transform duration-600 ease-verdant group-hover/post:scale-105"
+                  className="object-cover transition-transform duration-500 ease-verdant group-hover/post:scale-105"
                 />
               </div>
 
-              <p className="mt-5 text-[0.75rem] tracking-[0.12em] text-forest uppercase">
+              <p className="eyebrow mt-5">
                 {lead.publishedAtLabel} · {lead.readMinutes} min
               </p>
 
@@ -76,12 +76,12 @@ export function JournalPreview({ posts }: { posts: JournalCard[] }) {
                       aria-hidden="true"
                       fill
                       sizes="96px"
-                      className="object-cover transition-transform duration-600 ease-verdant group-hover/post:scale-105"
+                      className="object-cover transition-transform duration-500 ease-verdant group-hover/post:scale-105"
                     />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-[0.75rem] tracking-[0.12em] text-forest uppercase">
+                    <p className="eyebrow">
                       {post.publishedAtLabel}
                     </p>
                     <h3 className="mt-1.5 font-heading text-[1.0625rem] leading-snug font-semibold tracking-[-0.015em] text-ink transition-colors duration-200 group-hover/post:text-forest">

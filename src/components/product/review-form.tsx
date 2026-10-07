@@ -178,7 +178,7 @@ export function ReviewForm({
               >
                 <StarIcon
                   aria-hidden="true"
-                  strokeWidth={1.5}
+                  strokeWidth={1.75}
                   className={cn(
                     "size-6",
                     star <= rating
@@ -240,7 +240,7 @@ function StarDisplay({ rating }: { rating: number }) {
         <StarIcon
           key={star}
           aria-hidden="true"
-          strokeWidth={1.5}
+          strokeWidth={1.75}
           className={cn(
             "size-4",
             star <= rating ? "fill-forest text-forest" : "text-ink/20",

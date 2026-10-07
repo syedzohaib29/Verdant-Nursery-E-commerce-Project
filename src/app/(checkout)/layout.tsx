@@ -43,7 +43,7 @@ export default function CheckoutLayout({
           </Link>
 
           <p className="hidden items-center gap-1.5 text-small text-ink/55 sm:flex">
-            <LockIcon aria-hidden="true" strokeWidth={2} className="size-3.5" />
+            <LockIcon aria-hidden="true" strokeWidth={1.75} className="size-3.5" />
             Secure checkout
           </p>
 

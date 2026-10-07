@@ -83,7 +83,7 @@ export function CheckoutOrderSummary({
           </span>
           <ChevronDownIcon
             aria-hidden="true"
-            strokeWidth={2}
+            strokeWidth={1.75}
             className={cn(
               "size-4 text-ink/45 transition-transform duration-300 ease-verdant",
               mobileExpanded && "rotate-180",
@@ -181,7 +181,7 @@ export function CheckoutOrderSummary({
           <p className="mt-4 flex items-start gap-2 text-small leading-relaxed text-ink/55">
             <LockIcon
               aria-hidden="true"
-              strokeWidth={2}
+              strokeWidth={1.75}
               className="mt-0.5 size-3.5 shrink-0"
             />
             {paymentMethod === "COD"

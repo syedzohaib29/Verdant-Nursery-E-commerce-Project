@@ -213,7 +213,7 @@ export function CheckoutSuccessView({
               <span className="flex items-center justify-between">
                 <Icon
                   aria-hidden="true"
-                  strokeWidth={1.5}
+                  strokeWidth={1.75}
                   className="size-6 text-forest"
                 />
                 <span className="font-heading text-3xl font-bold text-ink/10">
@@ -234,7 +234,7 @@ export function CheckoutSuccessView({
         <div className="flex items-start gap-3 rounded-xl bg-mint/40 p-5">
           <MapPinIcon
             aria-hidden="true"
-            strokeWidth={1.5}
+            strokeWidth={1.75}
             className="mt-0.5 size-5 shrink-0 text-forest"
           />
           <div>
@@ -248,7 +248,7 @@ export function CheckoutSuccessView({
           {order.paymentMethod === "COD" ? (
             <CheckIcon
               aria-hidden="true"
-              strokeWidth={2}
+              strokeWidth={1.75}
               className="mt-0.5 size-5 shrink-0 text-forest"
             />
           ) : (

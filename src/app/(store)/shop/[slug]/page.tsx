@@ -102,15 +102,15 @@ export default async function ProductPage({ params }: Props) {
             ]}
           />
 
-          <div className="mt-6 grid gap-x-10 gap-y-10 lg:grid-cols-12 lg:gap-y-0">
-            <Reveal className="lg:col-span-7">
+          <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-x-10 gap-y-10 lg:grid-cols-12 lg:gap-y-0">
+            <Reveal className="min-w-0 lg:col-span-7">
               <ProductGallery
                 images={product.images}
                 name={product.name}
               />
             </Reveal>
 
-            <div className="lg:col-span-5 lg:pl-4">
+            <div className="min-w-0 lg:col-span-5 lg:pl-4">
               <Reveal>
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">

@@ -199,31 +199,6 @@ export async function getReviewSummary(
 }
 
 /** A customer's own reviews, including ones still awaiting moderation. */
-export async function getReviewsByUser(
-  userId: string,
-): Promise<(ReviewItem & { approved: boolean; productName: string })[]> {
-  const rows = await prisma.review.findMany({
-    where: { userId },
-    select: {
-      ...REVIEW_SELECT,
-      approved: true,
-      product: { select: { id: true, name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  const verifiedByProduct = new Map<string, ReadonlySet<string>>();
-
-  for (const productId of new Set(rows.map((row) => row.product.id))) {
-    verifiedByProduct.set(productId, await getVerifiedBuyerIds(productId));
-  }
-
-  return rows.map((row) => ({
-    ...toItem(row, verifiedByProduct.get(row.product.id) ?? new Set()),
-    approved: row.approved,
-    productName: row.product.name,
-  }));
-}
 
 /** Reviews waiting for a moderator, oldest first so nothing sits forever. */
 export async function getPendingReviews(

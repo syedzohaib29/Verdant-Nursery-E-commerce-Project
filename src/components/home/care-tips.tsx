@@ -39,7 +39,7 @@ export function CareTips({ posts }: { posts: JournalCard[] }) {
                   aria-hidden="true"
                   fill
                   sizes="(min-width: 1024px) 46vw, 92vw"
-                  className="object-cover transition-transform duration-600 ease-verdant group-hover/article:scale-105"
+                  className="object-cover transition-transform duration-500 ease-verdant group-hover/article:scale-105"
                 />
               </div>
 
@@ -61,7 +61,7 @@ export function CareTips({ posts }: { posts: JournalCard[] }) {
                       aria-hidden="true"
                       fill
                       sizes="96px"
-                      className="object-cover transition-transform duration-600 ease-verdant group-hover/article:scale-105"
+                      className="object-cover transition-transform duration-500 ease-verdant group-hover/article:scale-105"
                     />
                   </div>
 
@@ -106,8 +106,8 @@ function ArticleBody({
 }) {
   return (
     <div className={className}>
-      <p className="flex items-center gap-1.5 text-[0.75rem] tracking-[0.12em] text-forest uppercase">
-        <ClockIcon aria-hidden="true" className="size-3.5" strokeWidth={2} />
+      <p className="eyebrow flex items-center gap-1.5">
+        <ClockIcon aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
         {post.readMinutes} min read
       </p>
 

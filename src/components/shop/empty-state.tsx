@@ -29,7 +29,7 @@ export function ShopEmptyState({ query }: { query: ShopQuery }) {
       <p className="mt-3 max-w-sm text-pretty text-body text-text-muted">
         {filtered
           ? "Filters stack, and light plus a price plus a pet-safe check is a narrow room. Loosening one of them usually does it."
-          : "Nothing is published yet. The seed is the catalogue, so an empty shop means the seed has not been run."}
+          : "No plants are on the shelf yet. The greenhouse is still being stocked — do check back soon."}
       </p>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">

@@ -126,7 +126,7 @@ export function SearchDialog({
             <SearchIcon
               aria-hidden="true"
               className="size-5 shrink-0 text-forest"
-              strokeWidth={2}
+              strokeWidth={1.75}
             />
             <input
               type="text"

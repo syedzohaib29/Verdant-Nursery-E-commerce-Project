@@ -6,6 +6,7 @@ import { ArrowRightIcon } from "lucide-react";
 import { auth } from "@/auth";
 import { getOrders } from "@/lib/data/orders";
 import { OrderCard } from "@/components/account/order-card";
+import { Button } from "@/components/ui/button";
 import { safeCallbackUrl } from "@/lib/redirects";
 
 export const metadata: Metadata = {
@@ -45,13 +46,14 @@ export default async function AccountOrdersPage() {
             The greenhouse is open, and the first order is the one the nursery
             remembers.
           </p>
-          <Link
-            href="/shop"
-            className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-forest px-6 text-[0.9375rem] font-medium text-white outline-none transition-colors duration-200 hover:bg-forest/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          <Button
+            nativeButton={false}
+            render={<Link href="/shop" />}
+            className="mt-5"
           >
             Browse the shop
             <ArrowRightIcon aria-hidden="true" strokeWidth={1.75} className="size-4" />
-          </Link>
+          </Button>
         </div>
       ) : (
         <ul className="mt-8 grid gap-3 md:grid-cols-2">

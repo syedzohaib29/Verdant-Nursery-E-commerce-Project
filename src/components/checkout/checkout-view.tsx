@@ -412,7 +412,7 @@ export function CheckoutView({
     return (
       <div className="rounded-2xl border border-ink/10 bg-white px-6 py-12 text-center sm:px-10">
         <span className="mx-auto grid size-14 place-items-center rounded-full bg-mint text-forest">
-          <ShoppingBagIcon aria-hidden="true" strokeWidth={1.5} className="size-6" />
+          <ShoppingBagIcon aria-hidden="true" strokeWidth={1.75} className="size-6" />
         </span>
         <h2 className="mt-4 font-heading text-2xl font-bold tracking-[-0.01em] text-ink">
           Your basket is empty.
@@ -674,7 +674,7 @@ export function CheckoutView({
             <div className="flex items-start gap-3">
               <TruckIcon
                 aria-hidden="true"
-                strokeWidth={1.5}
+                strokeWidth={1.75}
                 className="mt-0.5 size-5 shrink-0 text-forest"
               />
               <div className="min-w-0">
@@ -741,7 +741,7 @@ export function CheckoutView({
           <p className="mt-3 flex items-center justify-center gap-1.5 text-small text-ink/55">
             <LockIcon
               aria-hidden="true"
-              strokeWidth={2}
+              strokeWidth={1.75}
               className="size-3.5"
             />
             Secure checkout

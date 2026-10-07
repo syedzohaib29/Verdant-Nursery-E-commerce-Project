@@ -12,7 +12,14 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force && tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "images:generate": "tsx prisma/generate-images.ts"
+    "images:generate": "tsx prisma/generate-images.ts",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "pretest:e2e": "npm run build",
+    "test": "npm run test:unit && npm run test:e2e",
+    "audit:responsive": "playwright test --project=responsive",
+    "analyze": "ANALYZE=true next build --webpack",
+    "lighthouse": "CHROME_PATH=~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome lighthouse http://localhost:3101 --quiet --chrome-flags='--headless=new --no-sandbox' --output=json --output-path=./docs/lighthouse.json"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -41,6 +48,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@next/bundle-analyzer": "^16.4.0",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
@@ -49,13 +58,15 @@
     "eslint": "^9",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.5.0",
+    "lighthouse": "^13.5.0",
     "prettier": "^3.9.9",
     "prisma": "^7.10.0",
     "shadcn": "^4.21.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "typescript-eslint": "^8.71.0"
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^3.2.7"
   },
   "overrides": {
     "glob": "^13.0.6"

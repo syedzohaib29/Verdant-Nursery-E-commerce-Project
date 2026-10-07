@@ -16,7 +16,7 @@ import { Navbar } from "@/components/layout/navbar";
  * from the outside: the URLs did not move, only the file that draws the frame did.
  *
  * It is a server component and reads nothing from the session, which is what keeps
- * `/`, `/care` and `/design-check` statically prerenderable.
+ * `/` and `/care` statically prerenderable.
  */
 export default function StoreLayout({ children }: LayoutProps<"/">) {
   return (

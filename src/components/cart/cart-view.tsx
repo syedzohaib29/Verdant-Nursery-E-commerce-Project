@@ -181,7 +181,7 @@ export function CartView({ customerName }: { customerName: string | null }) {
     <>
       <PageHeading customerName={customerName} count={items.length} />
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_25rem]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_25rem]">
         {/* The lines. A real list rather than a table of divs: a basket is a list of
             things with quantities and prices, and the definition list inside the
             summary is where the comparison actually happens. On a phone each row

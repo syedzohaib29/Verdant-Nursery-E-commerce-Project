@@ -74,34 +74,6 @@ export async function getUserById(id: string): Promise<UserSummary | null> {
   };
 }
 
-/**
- * Looked up by email, case-insensitively. Emails are stored lowercased by the
- * validation layer, but `mode: "insensitive"` keeps this correct even for rows
- * written before that rule existed.
- */
-export async function getUserByEmail(
-  email: string,
-): Promise<UserSummary | null> {
-  const row = await prisma.user.findUnique({
-    where: { email: email.trim().toLowerCase() },
-    select: USER_SELECT,
-  });
-  if (!row) return null;
-
-  const role = userRoleSchema.safeParse(row.role);
-  if (!role.success) return null;
-
-  return {
-    id: row.id,
-    name: row.name,
-    email: row.email,
-    role: role.data,
-    phone: row.phone,
-    disabled: row.disabled,
-    createdAt: row.createdAt.toISOString(),
-  };
-}
-
 export async function getUserWithAddresses(
   id: string,
 ): Promise<UserWithAddresses | null> {
@@ -166,97 +138,7 @@ export async function getAddressById(id: string): Promise<
   });
 }
 
-export async function getUsers(options: {
-  limit?: number;
-  search?: string;
-} = {}): Promise<UserSummary[]> {
-  const rows = await prisma.user.findMany({
-    where: options.search
-      ? {
-          OR: [
-            { name: { contains: options.search } },
-            { email: { contains: options.search.toLowerCase() } },
-          ],
-        }
-      : {},
-    select: USER_SELECT,
-    orderBy: { createdAt: "desc" },
-    take: options.limit ?? 50,
-  });
-
-  return rows.flatMap((row) => {
-    const role = userRoleSchema.safeParse(row.role);
-    if (!role.success) return [];
-
-    return [
-      {
-        id: row.id,
-        name: row.name,
-        email: row.email,
-        role: role.data,
-        phone: row.phone,
-        disabled: row.disabled,
-        createdAt: row.createdAt.toISOString(),
-      },
-    ];
-  });
-}
-
 /** Wishlist entries for a customer, newest first, as product cards. */
-export async function getWishlist(userId: string): Promise<
-  {
-    id: string;
-    productId: string;
-    addedAt: string;
-    product: {
-      id: string;
-      name: string;
-      slug: string;
-      priceCents: number;
-      salePriceCents: number | null;
-      stock: number;
-      image: string | null;
-    } | null;
-  }[]
-> {
-  const rows = await prisma.wishlistItem.findMany({
-    where: { userId },
-    select: {
-      id: true,
-      productId: true,
-      createdAt: true,
-      product: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          priceCents: true,
-          salePriceCents: true,
-          stock: true,
-          images: { select: { url: true }, orderBy: { position: "asc" }, take: 1 },
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  return rows.map((row) => ({
-    id: row.id,
-    productId: row.productId,
-    addedAt: row.createdAt.toISOString(),
-    product: row.product
-      ? {
-          id: row.product.id,
-          name: row.product.name,
-          slug: row.product.slug,
-          priceCents: row.product.priceCents,
-          salePriceCents: row.product.salePriceCents,
-          stock: row.product.stock,
-          image: row.product.images[0]?.url ?? null,
-        }
-      : null,
-  }));
-}
 
 /**
  * bcrypt cost. Twelve is roughly 250ms on commodity hardware — slow enough that a

@@ -156,7 +156,7 @@ function Verified({ verified }: { verified: boolean }) {
 
   return (
     <span className="inline-flex items-center gap-1 text-[0.75rem] text-forest">
-      <BadgeCheckIcon aria-hidden="true" className="size-3.5" strokeWidth={2} />
+      <BadgeCheckIcon aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
       Verified buyer
     </span>
   );

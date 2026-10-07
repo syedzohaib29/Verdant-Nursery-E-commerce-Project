@@ -45,3 +45,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Phase 10 audit output
+/docs/screenshots/
+prisma/e2e.db
+
+/test-results/
+/playwright-report/

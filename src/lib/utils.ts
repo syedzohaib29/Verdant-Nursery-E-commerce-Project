@@ -8,18 +8,29 @@ export { cn } from "cn";
  * The single place money becomes a string. Every amount in this codebase is an
  * integer number of cents, and every displayed price must come through here.
  *
- * `maximumFractionDigits: 2` is deliberate: it renders 2650 as "$26.50" but also
- * 2600 as "$26", which reads better on a price tag than "$26.00".
+ * Whole dollars drop the cipher ("$26", not "$26.00") because a price tag reads
+ * cleaner without it; anything with cents keeps exactly two ("$26.50"). Without
+ * the split a formatter with `maximumFractionDigits: 2` silently swallows the
+ * trailing zero and renders $26.50 as "$26.5", which looks like a typo on every
+ * shelf in the shop.
  */
-const priceFormatter = new Intl.NumberFormat("en-US", {
+const wholeDollarFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+const centsFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
 export function formatPrice(cents: number): string {
-  return priceFormatter.format(cents / 100);
+  const formatter = cents % 100 === 0 ? wholeDollarFormatter : centsFormatter;
+  return formatter.format(cents / 100);
 }
 
 /**

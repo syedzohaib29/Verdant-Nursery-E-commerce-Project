@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 /**
  * When an order number is not this customer's, the detail page calls `notFound`
  * and this renders inside the account frame — so a wrong number shows a clear
@@ -25,12 +27,13 @@ export default function OrderNotFound() {
           It may belong to another account, or the number may be wrong. Your
           orders are all listed on the page behind the button above.
         </p>
-        <Link
-          href="/account/orders"
-          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-forest px-6 text-[0.9375rem] font-medium text-white outline-none transition-colors duration-200 hover:bg-forest/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        <Button
+          nativeButton={false}
+          render={<Link href="/account/orders" />}
+          className="mt-5"
         >
           Back to your orders
-        </Link>
+        </Button>
       </div>
     </div>
   );

@@ -12,12 +12,6 @@ export const USER_ROLES = ["CUSTOMER", "STAFF", "ADMIN"] as const;
 export const userRoleSchema = z.enum(USER_ROLES);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
-export const USER_ROLE_LABELS: Record<UserRole, string> = {
-  CUSTOMER: "Customer",
-  STAFF: "Staff",
-  ADMIN: "Admin",
-};
-
 /**
  * The order lifecycle. An order moves PENDING → CONFIRMED → SHIPPED → DELIVERED,
  * and can be cancelled from PENDING or CONFIRMED — before it leaves the bench.
@@ -187,17 +181,6 @@ export const RESTOCK_BATCH = 12;
  */
 export const ADMIN_NAV_COOKIE = "verdant-admin-nav";
 
-export const FREE_SHIPPING_LABEL = "Free shipping";
-
-/*
-  Shipping defaults.
-
-  These live here rather than only in the Setting row because two other places
-  need to agree with them: the fallback that keeps a checkout working before the
-  database has been seeded, and the seed that writes the Setting row in the first
-  place. A fee that differs between those three would show one number in the cart
-  and charge another.
-*/
 export const SHIPPING_FEE_CENTS = 795;
 
 /** Baskets at or above this ship free. The comparison is inclusive. */

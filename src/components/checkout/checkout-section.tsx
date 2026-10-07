@@ -50,7 +50,7 @@ export function CheckoutSection({
           <span className="grid size-8 shrink-0 place-items-center rounded-full bg-mint text-forest">
             <CircleCheckIcon
               aria-hidden="true"
-              strokeWidth={2.25}
+              strokeWidth={1.75}
               className="size-4"
             />
           </span>

@@ -3,7 +3,7 @@ import "server-only";
 import { ORDER_STATUS_LABELS, ORDER_STATUSES, type OrderStatus } from "@/lib/constants";
 import { summarySelect, toSummary, type OrderSummary } from "@/lib/data/orders";
 import { prisma } from "@/lib/prisma";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 /*
   Admin order queries and the transition rules.
@@ -272,6 +272,3 @@ function endOfDay(iso: string): Date {
 }
 
 /** A money label for the transition log. */
-export function describeMoney(cents: number): string {
-  return formatPrice(cents);
-}

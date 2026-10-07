@@ -1,23 +1,18 @@
-"use client";
-
-import { motion, useReducedMotion } from "motion/react";
-
-import type { ReactNode } from "react";
-
-const EASE = [0.22, 1, 0.36, 1] as const;
+import type { CSSProperties, ReactNode } from "react";
 
 /**
  * The hero entrance: the one bold load animation on the site.
  *
- * Each headline line sits inside a clipped box and slides up from below it, so the
- * type appears to be pulled out from behind a mask rather than simply fading in.
- * Everything else — eyebrow, paragraph, buttons — is a quiet fade underneath it.
- * One strong move and two supporting ones; a page where everything animates has
- * nothing left to emphasise.
+ * Each headline line sits inside a clipped box and slides up from below it,
+ * so the type appears to be pulled out from behind a mask rather than simply
+ * fading in. Everything else — eyebrow, paragraph, buttons — is a quiet fade
+ * underneath it. One strong move and two supporting ones; a page where
+ * everything animates has nothing left to emphasise.
  *
- * The mask is a fixed-height box, which means a descender on the first line ("good")
- * would be cut off for good once the animation finished. The padding/negative
- * margin pair gives the glyphs the room they need without changing the layout.
+ * Implemented as pure CSS animations: the entrance must not wait for React
+ * hydration, otherwise every paint on this page (including the LCP
+ * photograph) is blocked on client work. The global reduced-motion override
+ * in globals.css collapses all of it to instant.
  */
 export function HeroEntrance({
   eyebrow,
@@ -29,26 +24,15 @@ export function HeroEntrance({
   lines: string[];
   children: ReactNode;
 }) {
-  const reduceMotion = useReducedMotion();
-
-  const rise = (delay: number) =>
-    reduceMotion
-      ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.3 } }
-      : {
-          initial: { opacity: 0, y: 14 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.5, ease: EASE, delay },
-        };
+  const rise: (delay: number) => CSSProperties = (delay) => ({
+    animation: `hero-rise 0.5s var(--ease-verdant) ${delay}s both`,
+  });
 
   return (
     <>
-      <motion.p
-        {...rise(0)}
-        className="eyebrow"
-        data-reveal=""
-      >
+      <p className="eyebrow" style={rise(0)} data-reveal="">
         {eyebrow}
-      </motion.p>
+      </p>
 
       <h1 className="mt-6 text-display text-ink">
         {lines.map((line, index) => (
@@ -56,25 +40,21 @@ export function HeroEntrance({
             key={line}
             className="block overflow-hidden pb-[0.14em] -mb-[0.14em]"
           >
-            <motion.span
+            <span
               className="block"
-              initial={reduceMotion ? { opacity: 0 } : { y: "112%" }}
-              animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
-              transition={
-                reduceMotion
-                  ? { duration: 0.3 }
-                  : { duration: 0.72, ease: EASE, delay: 0.08 + index * 0.09 }
-              }
+              style={{
+                animation: `hero-line-rise 0.4s var(--ease-verdant) ${index * 0.05}s both`,
+              }}
             >
               {line}
-            </motion.span>
+            </span>
           </span>
         ))}
       </h1>
 
-      <motion.div {...rise(0.34)} data-reveal="">
+      <div style={rise(0.12)} data-reveal="">
         {children}
-      </motion.div>
+      </div>
     </>
   );
 }

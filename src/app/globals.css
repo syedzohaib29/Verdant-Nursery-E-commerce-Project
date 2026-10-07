@@ -553,3 +553,29 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+  The load-entrance keyframes used by the hero. These are pure CSS animations
+  (no React, no JS) so the first paint — above all the LCP photograph — does
+  not have to wait for hydration to become visible. The global 0.01ms override
+  above shrinks them to instant for `prefers-reduced-motion: reduce`.
+*/
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-line-rise {
+  from {
+    transform: translateY(112%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

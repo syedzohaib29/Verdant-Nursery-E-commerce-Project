@@ -150,7 +150,7 @@ function Sparkline({ values }: { values: number[] }) {
         fill="none"
         stroke="var(--color-leaf)"
         strokeOpacity={0.75}
-        strokeWidth={1.5}
+        strokeWidth={1.75}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

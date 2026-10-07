@@ -86,7 +86,7 @@ function CategoryTile({
         aria-hidden="true"
         fill
         sizes="(min-width: 1024px) 46vw, (min-width: 640px) 48vw, 92vw"
-        className="object-cover transition-transform duration-600 ease-verdant group-hover/tile:scale-105"
+        className="object-cover transition-transform duration-500 ease-verdant group-hover/tile:scale-105"
       />
 
       {/* One scrim, weighted to the bottom where the words are. The top of the
@@ -126,7 +126,7 @@ function CategoryTile({
           aria-hidden="true"
           className="mt-3 inline-flex size-7 -translate-x-2 items-center justify-center rounded-full border border-white/40 text-white opacity-0 transition-[opacity,transform] duration-300 ease-verdant group-hover/tile:translate-x-0 group-hover/tile:opacity-100 group-focus-visible/tile:translate-x-0 group-focus-visible/tile:opacity-100"
         >
-          <ArrowRightIcon className="size-3.5" strokeWidth={2.25} />
+          <ArrowRightIcon className="size-3.5" strokeWidth={1.75} />
         </span>
       </div>
     </Link>

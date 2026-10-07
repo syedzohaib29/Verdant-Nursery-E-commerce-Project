@@ -3,6 +3,8 @@
 A calm plant nursery storefront — Next.js 16 (App Router), TypeScript, Tailwind v4,
 Prisma (SQLite), Auth.js v5, React Hook Form + Zod, Motion, Lucide, Sonner.
 
+Developed by **Syed Zohaib** — [GitHub](https://github.com/syedzohaib29) · [LinkedIn](https://www.linkedin.com/in/syed-zohaib-b9a47b204)
+
 ## Getting started
 
 ```bash
@@ -69,14 +71,33 @@ confirms that an order number exists.
 ## Scripts
 
 ```bash
-npm run dev          # development server
-npm run build        # production build
-npm run lint         # eslint
-npm run db:migrate   # prisma migrate deploy
-npm run db:generate  # prisma generate
-npm run db:seed      # seed the database
-npm run db:studio    # Prisma Studio (inspect stock & orders during testing)
+npm run dev             # development server
+npm run build           # production build
+npm run lint            # eslint
+npm run db:migrate      # prisma migrate deploy
+npm run db:generate     # prisma generate
+npm run db:seed         # seed the database
+npm run db:studio       # Prisma Studio (inspect stock & orders)
+npm run test:unit       # Vitest unit tests
+npm run test:e2e        # Playwright e2e (builds, then runs all projects)
+npm run audit:responsive# Playwright responsive-overflow audit only
+npm run analyze         # production build + bundle report in .next/analyze
+npm run lighthouse      # Lighthouse audit against a running server on :3101
 ```
+
+## Testing & checks
+
+- **Unit** — `npm run test:unit` (Vitest). Money-order maths and Zod schemas, pure
+  and DB-free so the checkout contract is testable without a database.
+- **End to end** — `npm run test:e2e` (Playwright). Every run production-builds the
+  app, copies the seeded dev database to `prisma/e2e.db`, starts `next start` on
+  port 3101, and runs three projects: `desktop-chromium` (full customer + admin
+  journeys), `mobile-chromium` (menu, drawer), and `responsive` (no horizontal
+  scroll at 320–1536px across every route). `pretest:e2e` handles the build.
+- **Bundle** — `npm run analyze` writes interactive report trees to
+  `.next/analyze/{client,nodejs,edge}.html`.
+- **Lighthouse** — `npm run lighthouse` audits `http://localhost:3101` using the
+  Playwright Chromium binary.
 
 ## Money & data rules
 
@@ -86,3 +107,43 @@ npm run db:studio    # Prisma Studio (inspect stock & orders during testing)
 - The cart lives in localStorage as *wishes*; every server action re-reads the
   catalogue, and stale prices or stock are corrected (or the line removed) the
   moment a basket is checked.
+
+## Going to production
+
+The app is a plain Next.js 16 server — `npm run build` then `npm run start` —
+so it deploys directly to Vercel, or to any Node 20+ host that keeps the
+database reachable and carries the environment variables in `.env.example`.
+
+- Auth.js signs its session tokens with `AUTH_SECRET`; always set it, and set
+  `AUTH_TRUST_HOST="true"` whenever a proxy or load balancer rewrites Host.
+- The production database is Postgres. The project pins Prisma 7 with an
+  explicit driver adapter; swapping is three edits, not a rebuild:
+  1. In `prisma/schema.prisma`, change `provider = "sqlite"` to
+     `provider = "postgresql"`.
+  2. In `src/lib/prisma.ts`, swap `PrismaBetterSqlite3` for the Postgres
+     adapter (`@prisma/adapter-pg` / `PrismaPg`).
+  3. Point `DATABASE_URL` at your Neon / RDS / self-hosted Postgres string,
+     then `npx prisma migrate deploy && npx prisma generate`.
+
+  All money, role and status fields are already provider-neutral (plain strings
+  and integer cents), so the schema itself ports as-is.
+- If you enable card payments, keep the Stripe webhook pointed at
+  `/api/webhooks/stripe` and `STRIPE_WEBHOOK_SECRET` current; the card option
+  remains hidden while `STRIPE_SECRET_KEY` is unset.
+- Without `RESEND_API_KEY`, order confirmations are logged instead of emailed —
+  set it (and `EMAIL_FROM`) for real receipts.
+
+## SEO, security and accessibility
+
+- `src/app/robots.ts` and each page's own `robots` metadata close checkout,
+  account and admin to indexing twice.
+- Every page ships `next/image` with sized `alt` text, colour contrast on the
+  forest-on-light-green pairing (leaf is reserved for surfaces because it sits
+  at 3.5:1 on white), touch-target minimums of 44px, and a visible legal
+  preference for `prefers-reduced-motion`.
+- Lighthouse at audit time: **SEO 100, best-practices 96, accessibility 96**.
+  Performance measures ~80/100 on mobile simulated throttling: FCP ~1.2s,
+  TBT ~130ms, while LCP is reported late because the hero photograph waits
+  on a CSS entrance animation. Security headers (CSP,
+  X-Frame-Options, Permissions-Policy, nosniff, strict Referrer-Policy)
+  are set for every route.

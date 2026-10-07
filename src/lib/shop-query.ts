@@ -1,6 +1,5 @@
 import {
   LIGHT_LEVEL_LABELS,
-  PRODUCT_SORT_LABELS,
   type LightLevel,
   type ProductSort,
 } from "@/lib/constants";
@@ -181,9 +180,6 @@ export function activeFilterChips(
 }
 
 /** How many filters are on, for the badge on the mobile Filters button. */
-export function activeFilterCount(query: ShopQuery): number {
-  return activeFilterChips(query).length;
-}
 
 /** True when anything at all is narrowing the list. */
 export function hasActiveFilters(query: ShopQuery): boolean {
@@ -210,6 +206,3 @@ function titleCase(slug: string): string {
 }
 
 /** The human name for the current sort, for the mobile control. */
-export function sortLabel(sort: ProductSort): string {
-  return PRODUCT_SORT_LABELS[sort];
-}

@@ -4,6 +4,7 @@ import {
   FREE_SHIPPING_THRESHOLD_CENTS,
   SHIPPING_FEE_CENTS,
 } from "@/lib/constants";
+import { computeOrderTotals, quoteShipping } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 
@@ -74,23 +75,17 @@ export async function getShippingQuote(subtotalCents: number): Promise<{
   remainingCents: number;
 }> {
   const settings = await getSettings();
-
-  if (subtotalCents >= settings.freeShippingThresholdCents) {
-    return {
-      shippingCents: 0,
-      shippingLabel: "Free",
-      isFree: true,
-      remainingCents: 0,
-    };
-  }
-
-  const remaining = settings.freeShippingThresholdCents - subtotalCents;
+  const { shippingCents, isFree, remainingCents } = quoteShipping(
+    subtotalCents,
+    settings.shippingFeeCents,
+    settings.freeShippingThresholdCents,
+  );
 
   return {
-    shippingCents: settings.shippingFeeCents,
-    shippingLabel: settings.shippingFeeLabel,
-    isFree: false,
-    remainingCents: remaining,
+    shippingCents,
+    shippingLabel: isFree ? "Free" : settings.shippingFeeLabel,
+    isFree,
+    remainingCents,
   };
 }
 
@@ -246,25 +241,29 @@ export async function calculateTotals(
   lines.sort((a, b) => a.name.localeCompare(b.name));
 
   const subtotalCents = lines.reduce((total, line) => total + line.lineCents, 0);
-  const itemCount = lines.reduce((total, line) => total + line.quantity, 0);
 
   const promo = promoCode ? await getPromoQuote(promoCode, subtotalCents) : null;
   const discountCents = promo?.valid ? promo.discountCents : 0;
 
-  const shipping = await getShippingQuote(subtotalCents - discountCents);
-  const totalCents = subtotalCents - discountCents + shipping.shippingCents;
+  const settings = await getSettings();
+  const totals = computeOrderTotals({
+    lines,
+    discountCents,
+    shippingFeeCents: settings.shippingFeeCents,
+    freeShippingThresholdCents: settings.freeShippingThresholdCents,
+  });
 
   return {
     lines,
-    itemCount,
-    subtotalCents,
-    subtotalLabel: formatPrice(subtotalCents),
-    discountCents,
-    discountLabel: formatPrice(discountCents),
-    shippingCents: shipping.shippingCents,
-    shippingLabel: shipping.isFree ? "Free" : shipping.shippingLabel,
-    totalCents,
-    totalLabel: formatPrice(totalCents),
+    itemCount: totals.itemCount,
+    subtotalCents: totals.subtotalCents,
+    subtotalLabel: formatPrice(totals.subtotalCents),
+    discountCents: totals.discountCents,
+    discountLabel: formatPrice(totals.discountCents),
+    shippingCents: totals.shippingCents,
+    shippingLabel: totals.shippingIsFree ? "Free" : settings.shippingFeeLabel,
+    totalCents: totals.totalCents,
+    totalLabel: formatPrice(totals.totalCents),
     promo: promo && promo.valid ? promo : null,
   };
 }
