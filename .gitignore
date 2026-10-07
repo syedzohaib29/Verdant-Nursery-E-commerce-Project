@@ -52,3 +52,7 @@ prisma/e2e.db
 
 /test-results/
 /playwright-report/
+
+# Agent/skill harness files — not part of the source review surface
+/.agents/
+/.opencode/
