@@ -18,6 +18,7 @@ import { auth } from "@/auth";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data/products";
 import { getReviewFormState, getReviewsByProduct, getReviewSummary } from "@/lib/data/reviews";
 import { getSettings } from "@/lib/data/settings";
+import { SITE_URL } from "@/lib/site";
 
 type Props = PageProps<"/shop/[slug]">;
 
@@ -54,6 +55,42 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
+      {/* The plant as structured data: name, photo, price and stock, so a
+          shopping rich result can lift them straight out of the page. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            image: product.image ? `${SITE_URL}${product.image}` : undefined,
+            description: product.blurb,
+            sku: product.sku,
+            brand: { "@type": "Brand", name: "Verdant" },
+            offers: {
+              "@type": "Offer",
+              url: `${SITE_URL}/shop/${product.slug}`,
+              priceCurrency: "USD",
+              price: (product.effectivePriceCents / 100).toFixed(2),
+              availability: product.inStock
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+              itemCondition: "https://schema.org/NewCondition",
+            },
+            ...(product.rating.count > 0
+              ? {
+                  aggregateRating: {
+                    "@type": "AggregateRating",
+                    ratingValue: String(product.rating.average),
+                    reviewCount: product.rating.count,
+                  },
+                }
+              : {}),
+          }),
+        }}
+      />
+
       <section className="bg-warm-white pt-6 pb-10 lg:pt-8 lg:pb-14">
         <div className="container-x">
           <Breadcrumbs
@@ -439,6 +476,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             ],
           }
         : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} — Verdant`,
+      description: product.blurb,
+      ...(image ? { images: [image] } : {}),
     },
   };
 }

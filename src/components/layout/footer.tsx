@@ -8,7 +8,6 @@ import { FooterGroup, type FooterLink } from "@/components/layout/footer-group";
 
 const SHOP: FooterLink[] = [
   { href: "/shop", label: "The greenhouse" },
-  { href: "/categories", label: "Categories" },
   { href: "/care", label: "Care notes" },
 ];
 
@@ -19,9 +18,10 @@ const COMPANY: FooterLink[] = [
 ];
 
 const SUPPORT: FooterLink[] = [
-  { href: "/contact", label: "Repotting service" },
-  { href: "/contact", label: "Delivery and returns" },
-  { href: "/contact", label: "The plant doctor" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/shipping-returns", label: "Shipping & returns" },
+  { href: "/privacy", label: "Privacy policy" },
+  { href: "/terms", label: "Terms" },
 ];
 
 // Placeholder handles. Confirm the real accounts before this ships.
@@ -61,7 +61,7 @@ export function Footer() {
 
         <FooterGroup title="Shop" links={SHOP} />
         <FooterGroup title="Company" links={COMPANY} />
-        <FooterGroup title="Care and Support" links={SUPPORT} />
+        <FooterGroup title="Support" links={SUPPORT} />
       </div>
 
       <div aria-hidden="true" className="overflow-hidden px-5">

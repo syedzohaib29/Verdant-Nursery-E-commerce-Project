@@ -47,8 +47,9 @@ const REVIEW_SELECT = {
  *
  * A Review row has no link back to an order, so "verified" is resolved by asking
  * the order lines rather than trusting a flag: a customer counts as verified for a
- * product when they have a paid or fulfilled order line containing it. Cancelled
- * and unpaid orders do not count, because nobody received the plant.
+ * product when they have an order line on an order that has left the bench
+ * (confirmed, shipped or delivered). Cancelled orders do not count, because
+ * nobody received the plant.
  */
 async function getVerifiedBuyerIds(
   productId: string,
@@ -56,7 +57,10 @@ async function getVerifiedBuyerIds(
   const lines = await prisma.orderItem.findMany({
     where: {
       productId,
-      order: { status: { in: ["PAID", "FULFILLED"] }, userId: { not: null } },
+      order: {
+        status: { in: ["CONFIRMED", "SHIPPED", "DELIVERED"] },
+        userId: { not: null },
+      },
     },
     select: { order: { select: { userId: true } } },
   });
@@ -224,10 +228,16 @@ export async function getReviewsByUser(
 /** Reviews waiting for a moderator, oldest first so nothing sits forever. */
 export async function getPendingReviews(
   limit = 20,
-): Promise<(ReviewItem & { approved: boolean; productName: string })[]> {
+): Promise<
+  (ReviewItem & { approved: boolean; productName: string; productSlug: string })[]
+> {
   const rows = await prisma.review.findMany({
     where: { approved: false },
-    select: { ...REVIEW_SELECT, approved: true, product: { select: { name: true } } },
+    select: {
+      ...REVIEW_SELECT,
+      approved: true,
+      product: { select: { name: true, slug: true } },
+    },
     orderBy: { createdAt: "asc" },
     take: limit,
   });
@@ -240,6 +250,7 @@ export async function getPendingReviews(
     ...toItem(row, nobody),
     approved: row.approved,
     productName: row.product.name,
+    productSlug: row.product.slug,
   }));
 }
 
@@ -259,8 +270,9 @@ export type ReviewFormState = {
  * Everything the "write a review" widget needs to know about this customer.
  *
  * Eligibility is decided the same way verified-buyer badges are: an order line
- * for the product on an order that is PAID or FULFILLED. A pending or cancelled
- * order does not count, because nobody has received the plant to judge it.
+ * for the product on an order that has left the bench (confirmed, shipped or
+ * delivered). A pending or cancelled order does not count, because nobody has
+ * received the plant to judge it.
  */
 export async function getReviewFormState(
   productId: string,
@@ -274,7 +286,7 @@ export async function getReviewFormState(
     prisma.orderItem.count({
       where: {
         productId,
-        order: { userId, status: { in: ["PAID", "FULFILLED"] } },
+        order: { userId, status: { in: ["CONFIRMED", "SHIPPED", "DELIVERED"] } },
       },
     }),
   ]);

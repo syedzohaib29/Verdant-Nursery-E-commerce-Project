@@ -183,6 +183,11 @@ model Order {
   totalCents     Int
   trackingNumber String?
 
+  // Idempotency guard for checkout. The client sends one random token per
+  // checkout attempt, so a submission retried after a network failure can never
+  // create two orders: the retry finds the row this column points at and stops.
+  checkoutToken String? @unique
+
   // Shipping address snapshot, copied at checkout so the order still has a
   // deliverable address if the customer later edits or deletes theirs.
   shipFullName   String

@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Inter } from "next/font/google";
+import { Bricolage_Grotesque, Geist } from "next/font/google";
 
 import "./globals.css";
 
 import { AppSession } from "@/components/auth/app-session";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_SOCIALS,
+  SITE_TAGLINE,
+  SITE_URL,
+} from "@/lib/site";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -13,19 +20,66 @@ const bricolage = Bricolage_Grotesque({
   display: "swap",
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Verdant — Plants for people who forget to water",
-    template: "%s | Verdant",
+    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "A small, opinionated nursery. Houseplants that arrive healthy, soil that drains properly, and advice you can actually follow.",
+  description: SITE_DESCRIPTION,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  openGraph: {
+    siteName: SITE_NAME,
+    url: SITE_URL,
+    type: "website",
+    locale: "en_US",
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — a small nursery in Portland`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
+  },
+};
+
+/** The business, in schema.org's words, for rich results. */
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE_NAME,
+  url: SITE_URL,
+  logo: `${SITE_URL}/icon.svg`,
+  description: SITE_DESCRIPTION,
+  email: "hello@verdant.dev",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Bench 4, Kiln Lane",
+    addressLocality: "Portland",
+    addressRegion: "OR",
+    postalCode: "97209",
+    addressCountry: "US",
+  },
+  sameAs: SITE_SOCIALS.map((social) => social.url),
 };
 
 export const viewport: Viewport = {
@@ -42,7 +96,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       // position on navigation, so the jump to the top is instant and does not
       // read as a flicker behind the incoming page.
       data-scroll-behavior="smooth"
-      className={`${bricolage.variable} ${inter.variable}`}
+      className={`${bricolage.variable} ${geist.variable}`}
     >
       <body className="flex min-h-screen flex-col antialiased">
         {/* Scroll reveals are driven by Motion, so without JavaScript their
@@ -57,6 +111,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+
+        {/* The business as structured data, so a rich result knows what this
+            site is before it has read a word of it. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
 
         {/* The whole tree, but not the chrome.
 

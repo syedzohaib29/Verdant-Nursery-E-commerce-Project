@@ -19,26 +19,32 @@ export const USER_ROLE_LABELS: Record<UserRole, string> = {
 };
 
 /**
- * The order lifecycle. A pending order can be paid or cancelled; a paid order can
- * ship or be refunded; a shipped order can still be refunded. Fulfilled and
- * refunded are terminal, and cancelled is terminal because nothing was taken.
+ * The order lifecycle. An order moves PENDING → CONFIRMED → SHIPPED → DELIVERED,
+ * and can be cancelled from PENDING or CONFIRMED — before it leaves the bench.
+ * Cancelled is terminal because nothing was taken; delivered is terminal because
+ * the plant is on the customer's shelf.
+ *
+ * Payment is deliberately not part of this chain: whether money has moved is
+ * `paymentStatus`, a separate column. A card order can be paid and still sit at
+ * PENDING until a person confirms it, and a cash-on-delivery order is only marked
+ * paid when it is delivered. One lifecycle for fulfilment, one for money.
  */
 export const ORDER_STATUSES = [
   "PENDING",
-  "PAID",
-  "FULFILLED",
+  "CONFIRMED",
+  "SHIPPED",
+  "DELIVERED",
   "CANCELLED",
-  "REFUNDED",
 ] as const;
 export const orderStatusSchema = z.enum(ORDER_STATUSES);
 export type OrderStatus = z.infer<typeof orderStatusSchema>;
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING: "Pending",
-  PAID: "Paid",
-  FULFILLED: "Fulfilled",
+  CONFIRMED: "Confirmed",
+  SHIPPED: "Shipped",
+  DELIVERED: "Delivered",
   CANCELLED: "Cancelled",
-  REFUNDED: "Refunded",
 };
 
 /**
@@ -50,11 +56,11 @@ export const ORDER_STATUS_TRANSITIONS: Record<
   OrderStatus,
   readonly OrderStatus[]
 > = {
-  PENDING: ["PAID", "CANCELLED"],
-  PAID: ["FULFILLED", "REFUNDED"],
-  FULFILLED: ["REFUNDED"],
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["SHIPPED", "CANCELLED"],
+  SHIPPED: ["DELIVERED"],
+  DELIVERED: [],
   CANCELLED: [],
-  REFUNDED: [],
 };
 
 export function canTransitionOrder(
@@ -62,6 +68,11 @@ export function canTransitionOrder(
   to: OrderStatus,
 ): boolean {
   return ORDER_STATUS_TRANSITIONS[from].includes(to);
+}
+
+/** The statuses an order can legally move to next. */
+export function nextStatuses(status: OrderStatus): readonly OrderStatus[] {
+  return ORDER_STATUS_TRANSITIONS[status];
 }
 
 export const PAYMENT_METHODS = ["STRIPE", "COD"] as const;
@@ -160,6 +171,21 @@ export const PRODUCT_SORT_LABELS: Record<ProductSort, string> = {
 
 /** Stock at or below this is flagged as low stock in the shop UI. */
 export const LOW_STOCK_THRESHOLD = 3;
+
+/**
+ * How many units one press of "Restock" adds to a shelf. A tray: big enough to
+ * matter, small enough that a mis-click is not a warehouse incident. The button
+ * copy, the confirmation and the server action all read this one number, so the
+ * dialog can never promise twelve and add ten.
+ */
+export const RESTOCK_BATCH = 12;
+
+/**
+ * Cookie that remembers whether the admin sidebar is collapsed. Read on the
+ * server in the admin layout so the rail renders at its saved width on the very
+ * first paint, and written from the client when the toggle is pressed.
+ */
+export const ADMIN_NAV_COOKIE = "verdant-admin-nav";
 
 export const FREE_SHIPPING_LABEL = "Free shipping";
 

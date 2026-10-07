@@ -1,9 +1,11 @@
 import Link from "next/link";
 
+import { DroopingPlant } from "@/components/brand/drooping-plant";
 import { LeafMark } from "@/components/layout/leaf-mark";
+import { Button } from "@/components/ui/button";
 
 /**
- * The 404.
+ * The branded 404.
  *
  * Two landmarks exist because the root layout no longer draws one: every route
  * group supplies its own `<main id="content">`, and this page sits below all of
@@ -13,37 +15,37 @@ import { LeafMark } from "@/components/layout/leaf-mark";
  */
 export default function NotFound() {
   return (
-    <main id="content" className="flex flex-1 items-center bg-warm-white">
+    <main
+      id="content"
+      className="flex flex-1 items-center bg-warm-white"
+    >
       <div className="container-x py-20">
-        <div className="mx-auto max-w-md">
-          <p className="flex items-center gap-2 text-forest">
+        <div className="mx-auto max-w-md text-center">
+          <p className="flex items-center justify-center gap-2 text-forest">
             <LeafMark className="size-6" />
-            <span className="eyebrow">Page not found</span>
+            <span className="eyebrow">Lost in the greenhouse</span>
           </p>
 
-          <h1 className="mt-4 text-h2 text-ink">
-            Nothing is growing at this address.
+          <DroopingPlant className="mx-auto mt-8 size-28 text-forest" />
+
+          <h1 className="mt-6 text-h2 text-ink">
+            This page is in the compost.
           </h1>
 
-          <p className="mt-4 text-body text-ink/70">
-            The link may be old, or a typo may have crept in. The shop is where
-            everything we actually have is listed.
+          <p className="mt-4 text-pretty text-body text-ink/70">
+            Whatever grew here has been repotted somewhere else — the link is
+            old, or a typo moved it. The good news: the shop is one click away,
+            and it has never once 404&apos;d.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/"
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-forest px-6 text-small font-medium text-white transition-colors hover:bg-forest/90 focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              Back to the home page
-            </Link>
-
-            <Link
-              href="/shop"
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-ink/20 px-6 text-small font-medium text-ink transition-colors hover:border-forest hover:text-forest focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Button nativeButton={false} render={<Link href="/shop" />}>
               Browse the shop
-            </Link>
+            </Button>
+
+            <Button variant="outline" nativeButton={false} render={<Link href="/" />}>
+              Back to the home page
+            </Button>
           </div>
         </div>
       </div>

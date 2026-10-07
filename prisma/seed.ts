@@ -581,7 +581,7 @@ async function report(prisma: PrismaClient): Promise<void> {
   }
 
   const revenue = await prisma.order.aggregate({
-    where: { status: { in: ["PAID", "FULFILLED"] } },
+    where: { status: { in: ["CONFIRMED", "SHIPPED", "DELIVERED"] } },
     _sum: { totalCents: true },
     _count: { _all: true },
   });

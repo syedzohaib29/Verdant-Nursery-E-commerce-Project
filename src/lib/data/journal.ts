@@ -143,3 +143,61 @@ export async function getRelatedPosts(
     publishedAtLabel: formatDate(row.publishedAt),
   }));
 }
+
+/**
+ * One page of published posts plus the totals a listing needs.
+ *
+ * The journal page uses this instead of `getJournalPosts` so "load more" has a
+ * count to work from and a stale page number resolves to an empty page rather
+ * than an error.
+ */
+export async function getJournalPostsPage(
+  options: { page?: number; perPage?: number } = {},
+): Promise<{
+  posts: JournalCard[];
+  total: number;
+  page: number;
+  pageCount: number;
+}> {
+  const page = Math.max(1, options.page ?? 1);
+  const perPage = options.perPage ?? 6;
+
+  const cardSelect = {
+    id: true,
+    title: true,
+    slug: true,
+    excerpt: true,
+    coverImage: true,
+    author: true,
+    readMinutes: true,
+    publishedAt: true,
+  } as const;
+
+  const [rows, total] = await Promise.all([
+    prisma.journalPost.findMany({
+      where: { published: true },
+      select: cardSelect,
+      orderBy: { publishedAt: "desc" },
+      skip: (page - 1) * perPage,
+      take: perPage,
+    }),
+    prisma.journalPost.count({ where: { published: true } }),
+  ]);
+
+  return {
+    posts: rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      slug: row.slug,
+      excerpt: row.excerpt,
+      coverImage: row.coverImage,
+      author: row.author,
+      readMinutes: row.readMinutes,
+      publishedAt: row.publishedAt.toISOString(),
+      publishedAtLabel: formatDate(row.publishedAt),
+    })),
+    total,
+    page,
+    pageCount: Math.max(1, Math.ceil(total / perPage)),
+  };
+}

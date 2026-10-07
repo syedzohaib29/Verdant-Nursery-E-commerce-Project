@@ -30,7 +30,6 @@ const DELTA_THRESHOLD = 6;
 
 const LINKS = [
   { href: "/shop", label: "Shop" },
-  { href: "/categories", label: "Categories" },
   { href: "/journal", label: "Journal" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },

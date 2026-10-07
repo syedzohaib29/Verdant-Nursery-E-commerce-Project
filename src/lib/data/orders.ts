@@ -64,7 +64,13 @@ export type OrderDetail = OrderSummary & {
   }[];
 };
 
-function toSummary(
+/**
+ * Turn a raw order row (with its item quantities) into the shared summary.
+ * Exported because the admin data layer reads the same rows through its own
+ * queries and must produce byte-identical summaries — two mappers would be two
+ * opinions about what an order "is".
+ */
+export function toSummary(
   row: {
     id: string;
     orderNumber: string;
@@ -96,7 +102,7 @@ function toSummary(
   };
 }
 
-const summarySelect = {
+export const summarySelect = {
   id: true,
   orderNumber: true,
   email: true,
@@ -266,9 +272,9 @@ export async function getRevenueByDay(days = 30): Promise<RevenuePoint[]> {
   const rows = await prisma.order.findMany({
     where: {
       createdAt: { gte: since },
-      // Cancelled and unpaid orders are not revenue. Counting them would make the
-      // chart disagree with the order list on the same screen.
-      status: { in: ["PAID", "FULFILLED"] },
+      // Cancelled orders are not revenue. Counting them would make the chart
+      // disagree with the order list on the same screen.
+      status: { in: ["CONFIRMED", "SHIPPED", "DELIVERED"] },
     },
     select: { createdAt: true, totalCents: true },
     orderBy: { createdAt: "asc" },
@@ -315,13 +321,13 @@ export async function getOrderStats(): Promise<{
     await Promise.all([
       prisma.order.count(),
       prisma.order.aggregate({
-        where: { status: { in: ["PAID", "FULFILLED"] } },
+        where: { status: { in: ["CONFIRMED", "SHIPPED", "DELIVERED"] } },
         _sum: { totalCents: true },
       }),
       prisma.order.count({ where: { status: "PENDING" } }),
-      prisma.order.count({ where: { status: "PAID" } }),
+      prisma.order.count({ where: { status: "PENDING" } }),
       prisma.order.aggregate({
-        where: { status: { in: ["PAID", "FULFILLED"] } },
+        where: { status: { in: ["CONFIRMED", "SHIPPED", "DELIVERED"] } },
         _avg: { totalCents: true },
       }),
     ]);

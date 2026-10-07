@@ -78,3 +78,24 @@ export function formatDate(date: Date, dateTime = false): string {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
+
+/**
+ * When a freshly-placed order can be expected to arrive.
+ *
+ * The same two dates answer "when will it get here" in the checkout's Delivery
+ * section and on the confirmation page, so a customer never sees one promise on
+ * the form and another on the receipt.
+ */
+export function getDeliveryWindow(): { from: Date; to: Date; label: string } {
+  const now = new Date();
+  const from = new Date(now);
+  from.setDate(from.getDate() + 4);
+  const to = new Date(now);
+  to.setDate(to.getDate() + 8);
+
+  return {
+    from,
+    to,
+    label: `${formatDate(from)}–${formatDate(to)}`,
+  };
+}

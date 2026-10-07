@@ -7,6 +7,7 @@
   the browser is exactly the mistake this boundary exists to prevent.
 */
 
+export * from "@/lib/data/admin";
 export * from "@/lib/data/categories";
 export * from "@/lib/data/journal";
 export * from "@/lib/data/orders";

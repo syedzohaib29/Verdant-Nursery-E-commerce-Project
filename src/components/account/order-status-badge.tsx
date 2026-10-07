@@ -9,17 +9,18 @@ import {
  * The one visual language for an order's state.
  *
  * The account pages and the admin screens both colour their statuses from here,
- * so "fulfilled" cannot look confident in the shop and tentative in the back
+ * so "delivered" cannot look confident in the shop and tentative in the back
  * office. Colour carries the emphasis and the text carries the meaning: neutral
- * for a still-resting order, forest for money taken, filled forest for a box on
- * a van, and the system's red for the two ways an order can end on a bad note.
+ * for a still-resting order, mint for one that is confirmed and being packed,
+ * leaf for a box on a van, filled forest for one that has arrived, and pale ink
+ * for the one way an order can end before it began.
  */
 const STATUS_STYLES: Record<OrderStatus, string> = {
   PENDING: "border-ink/10 bg-ink/[0.05] text-ink/70",
-  PAID: "border-forest/20 bg-mint text-forest",
-  FULFILLED: "border-forest bg-forest text-white",
+  CONFIRMED: "border-forest/20 bg-mint text-forest",
+  SHIPPED: "border-leaf/25 bg-leaf/10 text-forest",
+  DELIVERED: "border-forest bg-forest text-white",
   CANCELLED: "border-ink/10 bg-ink/[0.05] text-ink/50",
-  REFUNDED: "border-destructive/25 bg-destructive/10 text-destructive",
 };
 
 export function OrderStatusBadge({

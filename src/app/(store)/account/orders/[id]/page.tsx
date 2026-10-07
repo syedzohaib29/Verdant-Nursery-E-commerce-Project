@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeftIcon, MapPinIcon } from "lucide-react";
 
 import { auth } from "@/auth";
+import { CancelOrderButton } from "@/components/account/cancel-order-button";
 import { getOrderById } from "@/lib/data/orders";
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
 import { OrderStatusStepper } from "@/components/account/order-status-stepper";
@@ -51,8 +52,7 @@ export default async function AccountOrderDetailPage({ params }: Props) {
     order.paymentStatus in PAYMENT_STATUS_LABELS
       ? PAYMENT_STATUS_LABELS[order.paymentStatus as PaymentStatus]
       : order.paymentStatus;
-  const canReorder =
-    order.status !== "REFUNDED" && order.items.length > 0;
+  const canReorder = order.status !== "CANCELLED" && order.items.length > 0;
 
   return (
     <div>
@@ -75,6 +75,9 @@ export default async function AccountOrderDetailPage({ params }: Props) {
 
         <div className="flex items-center gap-3">
           {canReorder && <ReorderButton orderId={order.id} />}
+          {order.status === "PENDING" && order.paymentMethod === "COD" ? (
+            <CancelOrderButton orderId={order.id} />
+          ) : null}
           <OrderStatusBadge status={order.status} className="h-8 px-3" />
         </div>
       </div>
@@ -156,7 +159,7 @@ export default async function AccountOrderDetailPage({ params }: Props) {
             </address>
           </section>
 
-          {order.status === "REFUNDED" ? (
+          {order.paymentStatus === "REFUNDED" ? (
             <p className="rounded-xl border border-destructive/25 bg-destructive/10 p-5 text-[0.875rem] leading-relaxed text-destructive">
               This order was refunded in full. If the money has not landed within
               a few days, write to us with the number above.

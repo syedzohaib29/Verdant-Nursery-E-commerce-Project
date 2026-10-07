@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { addressSchema } from "@/lib/validations/address";
+import { MAX_CART_LINES } from "@/lib/validations/cart";
 import { emailSchema, quantitySchema } from "@/lib/validations/shared";
 import {
   orderStatusSchema,
@@ -43,38 +44,55 @@ export const applyPromoSchema = z.object({
 export type ApplyPromoInput = z.infer<typeof applyPromoSchema>;
 
 /**
- * Shipping address for checkout. Either an address from the customer's book
- * (`addressId`) or a fresh address typed into the form (`shipping`) is valid, and
- * a discriminated union makes "neither" unrepresentable rather than something to
- * discover at the point of charging a card.
+ * The shipping half of the checkout form, exactly as the address book spells it
+ * except without `isDefault`. The address form and the checkout must validate the
+ * same way, or an address saved from one place would bounce in the other.
  */
-export const checkoutSchema = z
-  .object({
-    email: emailSchema,
-    paymentMethod: paymentMethodSchema,
-    addressId: z.string().cuid().optional(),
-    shipping: addressSchema.partial({ isDefault: true }).optional(),
-    shippingMethod: z.enum(["STANDARD", "EXPRESS"]).default("STANDARD"),
-    saveAddress: z.coerce.boolean().default(false),
-    note: z.string().trim().max(500).optional().or(z.literal("")),
-    // A promo code is optional, but if one was typed it has to look plausible.
-    promoCode: z.string().trim().max(40).optional().or(z.literal("")),
-  })
-  .refine((values) => Boolean(values.addressId ?? values.shipping), {
-    message: "We need somewhere to send it.",
-    path: ["shipping"],
-  })
-  .refine((values) => !(values.addressId && values.shipping), {
-    message: "Pick a saved address or type a new one, not both.",
-    path: ["shipping"],
-  });
+export const checkoutAddressSchema = addressSchema.omit({ isDefault: true });
 
-export type CheckoutInput = z.infer<typeof checkoutSchema>;
+export type CheckoutAddressInput = z.infer<typeof checkoutAddressSchema>;
 
-/** Guest checkout skips the address book and types everything in. */
-export const guestCheckoutSchema = checkoutSchema.omit({ addressId: true });
+/**
+ * The whole checkout form, flat: the contact details (`email`), the shipping
+ * fields and the payment choice share one validation so a section cannot land
+ * on the server holding something the client schema would have caught and the
+ * client cannot render a section holding something the server would reject.
+ */
+export const checkoutFormSchema = checkoutAddressSchema.extend({
+  email: emailSchema,
+  paymentMethod: paymentMethodSchema,
+});
 
-export type GuestCheckoutInput = z.infer<typeof guestCheckoutSchema>;
+export type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
+
+/** One line the customer wants to buy. Prices never travel in this payload. */
+export const checkoutLineSchema = z.object({
+  productId: z.string().cuid("That is not a product we carry."),
+  quantity: quantitySchema,
+});
+
+export type CheckoutLineInput = z.infer<typeof checkoutLineSchema>;
+
+/**
+ * What `createOrderAction` accepts. There is deliberately no amount in here:
+ * the server prices every line from the database, quotes shipping from the
+ * settings row and the discount from the promo table, and ignores whatever the
+ * browser believes anything costs.
+ *
+ * `checkoutToken` is the client-side idempotency key (see the action); every
+ * field except the lines is what the form validated on the way in.
+ */
+export const createOrderSchema = z.object({
+  email: emailSchema,
+  paymentMethod: paymentMethodSchema,
+  promoCode: z.string().trim().max(32).optional().or(z.literal("")),
+  saveAddress: z.coerce.boolean().default(false),
+  checkoutToken: z.string().trim().min(8).max(128),
+  shipping: checkoutAddressSchema,
+  lines: z.array(checkoutLineSchema).min(1, "Your basket is empty.").max(MAX_CART_LINES),
+});
+
+export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 
 /** Admin order editing. Status and payment move independently in practice. */
 export const updateOrderStatusSchema = z.object({
@@ -85,3 +103,10 @@ export const updateOrderStatusSchema = z.object({
 });
 
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
+
+/** Cancelling is a customer action, scoped to their own order number. */
+export const cancelOrderSchema = z.object({
+  orderId: z.string().cuid(),
+});
+
+export type CancelOrderInput = z.infer<typeof cancelOrderSchema>;

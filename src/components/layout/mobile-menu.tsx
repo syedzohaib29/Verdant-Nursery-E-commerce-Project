@@ -17,7 +17,6 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 const LINKS = [
   { href: "/shop", label: "Shop" },
-  { href: "/categories", label: "Categories" },
   { href: "/journal", label: "Journal" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -89,7 +88,7 @@ export function MobileMenu() {
           </div>
 
           <SheetDescription className="sr-only">
-            Site navigation. Shop, Categories, Journal, About and Contact.
+            Site navigation. Shop, Journal, About and Contact.
           </SheetDescription>
 
           <motion.nav

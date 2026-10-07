@@ -350,6 +350,37 @@ export async function getProductsByIds(ids: string[]): Promise<ProductCard[]> {
 }
 
 /**
+ * Products by slug, in the order the slugs were asked for.
+ *
+ * The journal's "shop the plants in this post" strip is a fixed list of slugs in
+ * the prose, so ordering by the source list keeps the strip reading like the
+ * sentence that introduced it. Missing slugs silently drop out — a post survives
+ * a plant being taken off the bench without the strip crashing.
+ */
+export async function getProductsBySlugs(slugs: string[]): Promise<ProductCard[]> {
+  const wanted = [...new Set(slugs)];
+
+  if (wanted.length === 0) return [];
+
+  const rows = await prisma.product.findMany({
+    where: { slug: { in: wanted }, isActive: true },
+    select: cardSelect,
+  });
+
+  const bySlug = new Map<string, ProductCard>();
+
+  for (const row of rows) {
+    const card = toCard(row, "");
+    if (card) bySlug.set(row.slug, card);
+  }
+
+  return wanted.flatMap((slug) => {
+    const card = bySlug.get(slug);
+    return card ? [card] : [];
+  });
+}
+
+/**
  * A single product with everything its page needs. Returns null for a missing,
  * inactive or malformed product, so the caller renders a not-found rather than
  * crashing.

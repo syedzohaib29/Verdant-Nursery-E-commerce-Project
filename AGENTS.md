@@ -24,7 +24,9 @@ without asking.
 - Palette: ink #0B0F0C, forest #14532D, leaf #3E9B4F, mint #E6F2E8,
   warm-white #F8F8F4, white #FFFFFF. Green/white/black only.
 - Use forest (not leaf) for text on light backgrounds to keep AA contrast.
-- Fonts: Bricolage Grotesque (headings), Inter (body, tabular-nums for prices).
+- Fonts: Bricolage Grotesque (headings), Geist (body, tabular-nums for prices).
+  Geist replaced Inter by owner decision on 2026-10-07 — it was the font picked
+  at project setup; Bricolage stays the brand heading voice.
 - Voice: warm, knowledgeable, lightly witty nursery owner. No generic marketing copy.
 
 ## Polish rules (apply to every phase)

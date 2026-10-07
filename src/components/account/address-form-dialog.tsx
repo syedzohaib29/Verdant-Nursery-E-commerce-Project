@@ -3,12 +3,18 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDownIcon } from "lucide-react";
 
 import { saveAddressAction } from "@/app/actions/account";
 import { FormAlert } from "@/components/auth/form-alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -27,8 +33,6 @@ import {
   addressFormSchema,
   type AddressFormInput,
 } from "@/lib/validations/address";
-
-import { cn } from "cn";
 
 export type AddressRecord = {
   id: string;
@@ -289,28 +293,35 @@ export function AddressFormDialog({
 
           <Field invalid={Boolean(errors.country)}>
             <FieldLabel htmlFor="addr-country">Country</FieldLabel>
-            <div className="relative">
-              <FieldControl
-                render={
-                  <select
-                    id="addr-country"
-                    className={cn(inputClass, "appearance-none pr-10")}
-                    {...register("country")}
-                  >
+            <FieldControl
+              render={
+                <Select
+                  value={country}
+                  onValueChange={(value) => {
+                    if (value == null) return;
+                    setValue("country", value, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    });
+                  }}
+                  items={countryOptions(country).map((code) => ({
+                    value: code,
+                    label: code,
+                  }))}
+                >
+                  <SelectTrigger id="addr-country" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                     {countryOptions(country).map((code) => (
-                      <option key={code} value={code}>
+                      <SelectItem key={code} value={code}>
                         {code}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                }
-              />
-              <ChevronDownIcon
-                aria-hidden="true"
-                strokeWidth={1.75}
-                className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-ink/45"
-              />
-            </div>
+                  </SelectContent>
+                </Select>
+              }
+            />
             <AnimatedFieldError show={Boolean(errors.country)}>
               {errors.country?.message}
             </AnimatedFieldError>

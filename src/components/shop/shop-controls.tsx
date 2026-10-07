@@ -7,6 +7,13 @@ import { FilterPanel, type ShopCategory } from "@/components/shop/filter-panel";
 import { useShopQuery } from "@/components/shop/use-shop-query";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Sheet,
   SheetClose,
   SheetContent,
@@ -218,9 +225,9 @@ function ActiveChips({
 /**
  * Sort.
  *
- * A native `<select>` behind a styled trigger rather than a listbox: it is one
- * control instead of five, it gets the platform picker on a phone, and it is
- * operable from the keyboard without a roving tabindex to get wrong.
+ * The same design-system picker the back office uses, so the list opens in the
+ * shop's own typeface with a forest check on the choice in force — the native
+ * popup's platform chrome never matched the rest of the page.
  */
 function SortSelect({
   query,
@@ -229,41 +236,33 @@ function SortSelect({
   query: ShopQuery;
   goTo: (next: ShopQuery) => void;
 }) {
-  const id = "shop-sort";
+  const items = PRODUCT_SORTS.map((sort) => ({
+    value: sort,
+    label: PRODUCT_SORT_LABELS[sort],
+  }));
 
   return (
     <div className="flex items-center gap-2">
-      {/* Hidden from sight below `sm`, where the row has no room for a word and a
-          control. The select still shows its current value and the label is still
-          announced, so nothing is lost but the redundancy. */}
-      <label htmlFor={id} className="sr-only text-small text-text-muted sm:not-sr-only">
+      <label htmlFor="shop-sort" className="sr-only text-small text-text-muted sm:not-sr-only">
         Sort
       </label>
 
-      <div className="relative min-w-0">
-        <select
-          id={id}
-          value={query.sort}
-          onChange={(event) =>
-            goTo(withFilter(query, "sort", event.target.value as ProductSort))
-          }
-          className="h-11 appearance-none rounded-lg border border-ink/15 bg-white py-0 pr-9 pl-3 text-[0.875rem] text-ink transition-colors duration-200 outline-none hover:border-ink/40 focus-visible:border-forest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        >
-          {PRODUCT_SORTS.map((sort) => (
-            <option key={sort} value={sort}>
-              {PRODUCT_SORT_LABELS[sort]}
-            </option>
+      <Select
+        value={query.sort}
+        onValueChange={(next) => goTo(withFilter(query, "sort", next as ProductSort))}
+        items={items}
+      >
+        <SelectTrigger id="shop-sort" className="w-auto min-w-40" aria-label="Sort plants">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
           ))}
-        </select>
-
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 12 12"
-          className="pointer-events-none absolute top-1/2 right-3 size-3 -translate-y-1/2 fill-none stroke-ink/55 stroke-[1.5]"
-        >
-          <path d="M2.5 4.5 6 8l3.5-3.5" />
-        </svg>
-      </div>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

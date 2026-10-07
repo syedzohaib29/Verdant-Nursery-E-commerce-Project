@@ -7,15 +7,16 @@ import { cn } from "cn";
 /**
  * Where an order is, drawn as a line you can read.
  *
- * Three milestones cover every live state and the two endings get their own
- * terminal node, because a cancelled order is not "stuck on payment received".
- * The statuses the database stores are translated into a fixed progression here,
+ * Four milestones cover every live state and a cancelled order gets its own
+ * terminal node, because a cancelled order is not "stuck on confirmation". The
+ * statuses the database stores are translated into a fixed progression here,
  * so the drawing can never disagree with the label in the badge next to it.
  */
 const MILESTONES = [
   { status: "PENDING" as const, label: "Order placed", hint: "We have your order." },
-  { status: "PAID" as const, label: "Payment received", hint: "Your plant is being packed." },
-  { status: "FULFILLED" as const, label: "On its way", hint: "Out the door with a name tag." },
+  { status: "CONFIRMED" as const, label: "Confirmed", hint: "Your plant is being packed." },
+  { status: "SHIPPED" as const, label: "On its way", hint: "Out the door with a name tag." },
+  { status: "DELIVERED" as const, label: "Delivered", hint: "Find a window and a watering can." },
 ] as const;
 
 type Step = {
@@ -35,19 +36,6 @@ function stepsFor(status: OrderStatus): Step[] {
         hint: "Nothing was charged.",
         state: "danger",
         index: 1,
-      },
-    ];
-  }
-
-  if (status === "REFUNDED") {
-    return [
-      { ...MILESTONES[0], state: "done", index: 0 },
-      { ...MILESTONES[1], state: "done", index: 1 },
-      {
-        label: "Refunded",
-        hint: "The money is on its way back.",
-        state: "danger",
-        index: 2,
       },
     ];
   }

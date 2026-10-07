@@ -12,9 +12,10 @@
   - There is a gentle upward trend. The last thirty days hold noticeably more
     orders than the first thirty, which is what word-of-mouth growth looks like.
   - Status follows age, not chance. Anything from the last few days is still
-    pending or paid, anything older has been fulfilled, one order was cancelled
-    after a card was declined and one was refunded. A status column that ignored
-    the date would put a two-hour-old order in the same state as one from March.
+    pending or confirmed, anything older has been shipped or delivered, one order
+    was cancelled after a card was declined and one was refunded. A status column
+    that ignored the date would put a two-hour-old order in the same state as one
+    from March.
   - About a third of orders are guest checkout, so the account-less path has real
     rows behind it rather than only happy-path data.
   - Roughly half of a signed-in customer's orders contain something they later
@@ -70,10 +71,10 @@ const RECENCY_SPAN = 0.45;
 
 export type SeedOrderStatus =
   | "PENDING"
-  | "PAID"
-  | "FULFILLED"
-  | "CANCELLED"
-  | "REFUNDED";
+  | "CONFIRMED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
 
 export type SeedOrder = {
   orderNumber: string;
@@ -249,10 +250,10 @@ function dayOffsets(random: () => number, count: number): number[] {
 
 /** Statuses follow the age of the order, with a little jitter inside each band. */
 function statusFor(daysAgo: number, random: () => number): SeedOrderStatus {
-  if (daysAgo <= 2) return random() < 0.45 ? "PENDING" : "PAID";
-  if (daysAgo <= 9) return random() < 0.5 ? "PAID" : "PENDING";
-  if (daysAgo <= 16) return random() < 0.55 ? "FULFILLED" : "PAID";
-  return "FULFILLED";
+  if (daysAgo <= 2) return random() < 0.45 ? "PENDING" : "CONFIRMED";
+  if (daysAgo <= 9) return random() < 0.5 ? "CONFIRMED" : "PENDING";
+  if (daysAgo <= 16) return random() < 0.55 ? "SHIPPED" : "CONFIRMED";
+  return "DELIVERED";
 }
 
 /** A UPS-style tracking number: 1Z, two letters, then nine digits. */
@@ -409,7 +410,10 @@ export function generateOrders(
         subtotalCents - discountCents >= FREE_SHIPPING_THRESHOLD_CENTS
           ? 0
           : SHIPPING_FEE_CENTS,
-      trackingNumber: status === "FULFILLED" ? trackingNumber(random) : null,
+      trackingNumber:
+        status === "SHIPPED" || status === "DELIVERED"
+          ? trackingNumber(random)
+          : null,
       daysAgo,
       // Trading hours with a lunch bump, because a plant shop is not a website.
       hour: 9 + Math.floor(random() * 11),
@@ -429,14 +433,14 @@ export function generateOrders(
     newestPending.trackingNumber = null;
   }
 
-  // Exactly one refund: a fulfilled order old enough to have been delivered and
-  // then sent back, so it has to be at least three weeks old.
+  // Exactly one refund: a delivered order old enough to have been delivered and
+  // then sent back, so it has to be at least three weeks old. The order itself
+  // stays DELIVERED — the plant arrived; only the money went back.
   const refundable = drafts
-    .filter((order) => order.status === "FULFILLED" && order.daysAgo >= 21)
+    .filter((order) => order.status === "DELIVERED" && order.daysAgo >= 21)
     .sort((a, b) => a.daysAgo - b.daysAgo)[0];
 
   if (refundable) {
-    refundable.status = "REFUNDED";
     refundable.paymentStatus = "REFUNDED";
   }
 

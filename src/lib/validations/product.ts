@@ -42,14 +42,14 @@ export const productSchema = z
       .toUpperCase()
       .regex(/^[A-Z0-9-]+$/, "Letters, numbers and hyphens only."),
     categoryId: z.string().cuid("Pick a category."),
-    featured: z.coerce.boolean().default(false),
+    featured: z.coerce.boolean<boolean>(),
     light: lightLevelSchema,
     water: waterLevelSchema,
-    petSafe: z.coerce.boolean().default(false),
+    petSafe: z.coerce.boolean<boolean>(),
     difficulty: difficultySchema,
     heightCm: z.coerce.number<number>().int().min(1).max(500).nullable().optional(),
     careNotes: z.string().trim().min(10, "Care notes help people keep it alive.").max(2000),
-    isActive: z.coerce.boolean().default(true),
+    isActive: z.coerce.boolean<boolean>(),
   })
   // A sale price below full price is a discount; anything else is a pricing
   // mistake that would quietly show the customer a worse deal than intended.
@@ -110,6 +110,19 @@ export const productImageSchema = z.object({
 
 export type ProductImageInput = z.infer<typeof productImageSchema>;
 
+/**
+ * Admin restock.
+ *
+ * Deliberately bare: the batch size is a server-side constant, so the only
+ * thing a client can ask for is *which* shelf to top up. There is no price and
+ * no target stock to tamper with.
+ */
+export const restockSchema = z.object({
+  productId: z.string().min(1, "Missing product."),
+});
+
+export type RestockInput = z.infer<typeof restockSchema>;
+
 export const productReviewSchema = z.object({
   productId: z.string().cuid(),
   rating: ratingSchema,
@@ -136,15 +149,15 @@ export const categorySchema = z.object({
   slug: z
     .string()
     .trim()
-    .min(2)
-    .max(80)
+    .min(2, "A slug is needed for the URL.")
+    .max(80, "The slug is too long for a URL.")
     .regex(
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
       "Lowercase words joined by single hyphens.",
     ),
   description: z.string().trim().min(20, "Say what belongs in here.").max(400),
   image: z.string().trim().min(1, "Categories need an image."),
-  sortOrder: z.coerce.number<number>().int().default(0),
+  sortOrder: z.coerce.number<number>().int().min(0, "Zero or above."),
 });
 
 export type CategoryInput = z.infer<typeof categorySchema>;
