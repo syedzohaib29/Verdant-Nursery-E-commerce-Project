@@ -17,7 +17,7 @@ test.describe("account lifecycle", () => {
     // Register
     await page.goto("/register");
     await page.getByLabel("Name").fill("Tester Fern");
-    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Email", { exact: true }).fill(email);
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByLabel("Confirm password", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Create account" }).click();
@@ -28,9 +28,13 @@ test.describe("account lifecycle", () => {
     await page.getByRole("button", { name: "Sign out" }).first().click();
     await expect(page).toHaveURL("/");
 
-    // Sign back in
+    // Sign back in. `exact` on the email is not optional: the storefront has two
+    // newsletter fields labelled "Email address" — one in the band, one in the
+    // footer — and a substring match picks up both the moment this lands on a page
+    // that has either.
     await page.goto("/login");
-    await page.getByLabel("Email").fill(email);
+    await expect(page.getByRole("heading", { name: "Welcome back." })).toBeVisible();
+    await page.getByLabel("Email", { exact: true }).fill(email);
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Sign in" }).click();
     await page.waitForURL(/^((?!\/login).)*$/);

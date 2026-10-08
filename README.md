@@ -167,7 +167,10 @@ every variable.
   2. In `src/lib/prisma.ts`, swap `PrismaBetterSqlite3` for the Postgres
      adapter (`@prisma/adapter-pg` / `PrismaPg`).
   3. Point `DATABASE_URL` at your Neon/RDS string, then
-     `npx prisma migrate deploy && npx prisma generate`.
+     `npx prisma migrate deploy && npx prisma generate`. Use
+     `?sslmode=verify-full` rather than `?sslmode=require` — pg treats them as
+     aliases for the same thing but prints a deprecation warning for `require`
+     on every connection.
 - All money, role and status fields are provider-neutral (strings + cents), so
   the schema ports as-is.
 - Keep the Stripe webhook pointed at `/api/webhooks/stripe`; the card option

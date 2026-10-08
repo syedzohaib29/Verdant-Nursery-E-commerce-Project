@@ -54,7 +54,7 @@ export async function checkoutOrder(
   await page.waitForURL(/\/checkout$/);
 
   // 1 — Contact
-  await page.getByLabel("Email").fill(opts.email);
+  await page.getByLabel("Email", { exact: true }).fill(opts.email);
   await page.getByLabel("Phone").fill(opts.phone ?? "503-555-0148");
   await page.getByRole("button", { name: "Continue", exact: true }).click();
 

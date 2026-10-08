@@ -50,14 +50,28 @@ function SessionRefresher() {
   const { update } = useSession();
   const mounted = useRef(false);
 
+  /**
+   * `update` in a ref, and deliberately *not* in the dependency list.
+   *
+   * `update()` puts the fetched session into provider state, which re-renders
+   * every consumer — including this one. If `update`'s identity also changes with
+   * that render, the effect re-fires, fetches again, re-renders again, and the
+   * provider ends up in a loop that refetches `/api/auth/session` continuously.
+   * That loop was real: sign-out stopped working entirely, because the page never
+   * went idle long enough to complete the click. Depending on the path alone means
+   * one refetch per navigation and none per render, which is the intent.
+   */
+  const updateRef = useRef(update);
+  updateRef.current = update;
+
   useEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
       return;
     }
 
-    void update();
-  }, [pathname, update]);
+    void updateRef.current();
+  }, [pathname]);
 
   return null;
 }

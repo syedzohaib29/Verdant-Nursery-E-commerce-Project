@@ -16,7 +16,7 @@ test.describe("admin back office", () => {
 
     await page.goto("/register");
     await page.getByLabel("Name").fill("Nosy Customer");
-    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Email", { exact: true }).fill(email);
     await page.getByLabel("Password", { exact: true }).fill("Password123!");
     await page.getByLabel("Confirm password", { exact: true }).fill("Password123!");
     await page.getByRole("button", { name: "Create account" }).click();
@@ -38,7 +38,7 @@ test.describe("admin back office", () => {
 
     // Sign in as admin and create the plant
     await page.goto("/login?callbackUrl=/admin");
-    await page.getByLabel("Email").fill(ADMIN_EMAIL);
+    await page.getByLabel("Email", { exact: true }).fill(ADMIN_EMAIL);
     await page.getByLabel("Password", { exact: true }).fill(ADMIN_PASSWORD);
     await page.getByRole("button", { name: "Sign in" }).click();
     // Matches the dashboard path specifically: the login page's own URL carries

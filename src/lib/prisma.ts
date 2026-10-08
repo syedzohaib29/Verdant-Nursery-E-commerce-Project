@@ -14,13 +14,6 @@ function createPrismaClient() {
     );
   }
   const adapter = new PrismaPg(connectionString);
-  // TEMP: reveal effective connection string's host/scheme at diagnostic time.
-  try {
-    const u = new URL(connectionString);
-    console.error(`[prisma-probe] scheme=${u.protocol} host=${u.hostname}:${u.port} db=${u.pathname.replace('/', '')} ?sslmode=${u.searchParams.get('sslmode')}`);
-  } catch {
-    console.error(`[prisma-probe] connection string unparsable: ${JSON.stringify(connectionString.slice(0,60))}`);
-  }
   return new PrismaClient({ adapter });
 }
 
