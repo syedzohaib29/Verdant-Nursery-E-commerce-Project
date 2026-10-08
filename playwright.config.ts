@@ -2,9 +2,14 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * E2E runs against a production build of the app (`next build && next start`)
- * pointed at its own SQLite file. `e2e/global-setup.ts` copies the seeded dev
- * database across before the server boots, so every run starts from the same
- * known catalogue and the tests can mutate it freely.
+ * pointed at the real Postgres database in `DATABASE_URL`.
+ *
+ * There used to be a private SQLite copy per run; there is no file to copy once
+ * the driver moved to Postgres, so the suite now shares the configured database
+ * and leans on its tests being additive — every account, product and order a test
+ * creates carries a timestamp in its name. `e2e/global-setup.ts` applies the
+ * migrations first and fails with one clear line if the URL is missing or still
+ * points at a SQLite file.
  *
  * Two browser projects: a desktop Chromium for the full journeys, and a mobile
  * project (390px, touch) for the menu and drawer flows. The responsive audit
@@ -30,7 +35,9 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       ...process.env,
-      DATABASE_URL: "file:./prisma/e2e.db",
+      // Deliberately not overridden. `next start` loads `.env` itself, so the
+      // server picks up the Postgres URL from there; pinning a `file:` URL here
+      // is what broke the suite the day the adapter moved.
       PORT: "3101",
     },
   },

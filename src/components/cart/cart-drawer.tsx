@@ -153,13 +153,21 @@ export function CartDrawer() {
               Checkout
             </Button>
 
-            <div className="flex gap-2.5">
+            {/* Stacked below `sm`, side by side above it. Two `flex-1` buttons
+                share whatever the panel gives them, and the button base carries
+                `whitespace-nowrap` plus `shrink-0` — so on a 320px phone each was
+                handed roughly half of 272px of usable width and kept its full
+                label anyway, pushing "Keep shopping" off the panel and clipping
+                it. One column has room for both labels at any width a drawer
+                opens at; the pair only shares a line once there is enough of it
+                to go halves without either label being cut. */}
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <Button
                 size="lg"
                 variant="secondary"
                 nativeButton={false}
                 render={<Link href="/cart" onClick={closeDrawer} />}
-                className="flex-1"
+                className="w-full"
               >
                 View basket
               </Button>
@@ -169,7 +177,7 @@ export function CartDrawer() {
                 variant="secondary"
                 nativeButton
                 onClick={closeDrawer}
-                className="flex-1"
+                className="w-full"
               >
                 Keep shopping
               </Button>

@@ -56,3 +56,7 @@ prisma/e2e.db
 # Agent/skill harness files — not part of the source review surface
 /.agents/
 /.opencode/
+
+# Personal study notes — not part of the project
+/PROJECT_QA.txt
+/PROJECT_QA.pdf

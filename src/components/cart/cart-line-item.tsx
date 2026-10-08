@@ -105,7 +105,13 @@ export function CartLineItem({
           </p>
         </div>
 
-        <div className="flex items-center justify-between gap-3">
+        {/* Wrapping, not squeezing. The stepper is 124px of 44px targets and
+            "Remove" is about 64px; inside a 320px drawer the text column is
+            ~184px wide, so the pair no longer fit on one line and were pushing
+            past the panel's own padding. Letting them wrap puts Remove under the
+            stepper instead of half outside the sheet, and keeps both at their
+            44px targets rather than shrinking either to make room. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <QuantityControl
             quantity={item.quantity}
             stock={item.stock}
@@ -116,7 +122,7 @@ export function CartLineItem({
           <button
             type="button"
             onClick={() => removeItem(item.productId)}
-            className="rounded-sm text-[0.8125rem] text-ink/55 underline-offset-4 transition-colors duration-200 hover:text-forest hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="ml-auto min-h-11 shrink-0 rounded-sm px-1 text-[0.8125rem] text-ink/55 underline-offset-4 transition-colors duration-200 hover:text-forest hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             Remove
             <span className="sr-only"> {item.name} from the basket</span>
